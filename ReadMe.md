@@ -1,32 +1,27 @@
-# LightBulb
-
-[![Status](https://img.shields.io/badge/status-maintenance-ffd700.svg)](https://github.com/Tyrrrz/.github/blob/prime/docs/project-status.md)
-[![Made in Ukraine](https://img.shields.io/badge/made_in-ukraine-ffd700.svg?labelColor=0057b7)](https://tyrrrz.me/ukraine)
-[![Build](https://img.shields.io/github/actions/workflow/status/Tyrrrz/LightBulb/main.yml?branch=prime)](https://github.com/Tyrrrz/LightBulb/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/Tyrrrz/LightBulb/prime)](https://codecov.io/gh/Tyrrrz/LightBulb)
-[![Release](https://img.shields.io/github/release/Tyrrrz/LightBulb.svg)](https://github.com/Tyrrrz/LightBulb/releases)
-[![Downloads](https://img.shields.io/github/downloads/Tyrrrz/LightBulb/total.svg)](https://github.com/Tyrrrz/LightBulb/releases)
-[![Discord](https://img.shields.io/discord/869237470565392384?label=discord)](https://discord.gg/2SUWKFnHSm)
-[![Fuck Russia](https://img.shields.io/badge/fuck-russia-e4181c.svg?labelColor=000000)](https://twitter.com/tyrrrz/status/1495972128977571848)
-
-<table>
-    <tr>
-        <td width="99999" align="center">Development of this project is entirely funded by the community. <b><a href="https://tyrrrz.me/donate">Consider donating to support!</a></b></td>
-    </tr>
-</table>
+# LightBulbKDE
 
 <p align="center">
     <img src="favicon.png" alt="Icon" />
 </p>
 
-**LightBulb** is an application that reduces eyestrain produced by staring at a computer screen when working late hours.
-As the day goes on, it continuously adjusts gamma, transitioning the display color temperature from cold blue in the afternoon to warm yellow during the night.
-Its primary objective is to match the color of the screen to the light sources of your surrounding environment — sunlight during the day and artificial light during the night.
-**LightBulb** has minimal impact on performance and offers many customization options.
+**LightBulbKDE** is [LightBulb](https://github.com/Tyrrrz/LightBulb), ported to KDE Plasma on Linux.
+Like the original, it warms the screen's color temperature and lowers its brightness from sunset to sunrise, with smooth transitions, location-based or manual sunrise and sunset times, and the same settings.
 
-> ❔ If you have questions or issues, **please refer to the [wiki](https://github.com/Tyrrrz/LightBulb/wiki)**.
+LightBulb does this on Windows by loading a gamma ramp into each display.
+On Plasma, KWin owns the screen and no other program can do that, so LightBulbKDE drives the two controls KWin offers instead:
+
+- **Temperature** goes through Plasma's own Night Light, held in its "Always on" mode at the temperature LightBulbKDE wants.
+- **Brightness** goes through the dimming multiplier KWin keeps for every screen on top of its brightness slider. This works with HDR on, where monitors lock their own backlight.
+
+LightBulb is the work of [Oleksii Holub](https://github.com/Tyrrrz), and this fork changes only what Linux needs.
+If it's useful to you, consider [supporting the original project](https://tyrrrz.me/donate).
+On Windows, use [upstream LightBulb](https://github.com/Tyrrrz/LightBulb/releases).
+
+![dashboard](.assets/dashboard-kde.png)
 
 ## Terms of use<sup>[[?]](https://github.com/Tyrrrz/.github/blob/prime/docs/why-so-political.md)</sup>
+
+These are upstream LightBulb's terms, and they carry over to this fork.
 
 By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all the following statements:
 
@@ -37,32 +32,35 @@ By using this project or its source code, for any purpose and in any shape or fo
 
 To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
 
-## Download
+## Requirements
 
-- 🟢 [**Stable release**](https://github.com/Tyrrrz/LightBulb/releases)
-- 🟠 [CI build](https://github.com/Tyrrrz/LightBulb/actions/workflows/main.yml)
-- 📦 [WinGet](https://winget.run/pkg/Tyrrrz/LightBulb): `winget install Tyrrrz.LightBulb` (community-maintained)
-- 📦 [Scoop](https://scoop.sh/#/apps?q=LightBulb&p=1&id=9639ce8d7756b4c8a252368ef718c25b5a3b4ce0): `scoop install extras/lightbulb` (community-maintained)
-- 📦 [Chocolatey](https://push.chocolatey.org/packages/lightbulb): `choco install lightbulb` (community-maintained)
+- KDE Plasma 6 in a Wayland session (developed on Plasma 6.6)
+- `kwriteconfig6` and `kscreen-doctor`, both of which come with Plasma
+- The .NET 10 SDK to build it (on Ubuntu, `sudo apt install dotnet-sdk-10.0`)
 
-> [!NOTE]
-> Community-maintained packages are published independently from this repository and may not always be up to date with the latest release.
+## Install
 
-> [!NOTE]
-> If you're unsure which build is right for your system, consult with [this page](https://useragent.cc) to determine your OS and CPU architecture.
+```bash
+git clone https://github.com/Laserwolve/LightBulbKDE.git
+cd LightBulbKDE
+./Installer/Linux/install.sh
+```
 
-## Features
+The script builds a self-contained copy into `~/.local/share/LightBulbKDE` and adds LightBulbKDE to the application launcher.
+Running it again updates the installed copy.
+Settings are kept in `~/.config/LightBulbKDE/Settings.json`, and **Start at login** (on by default after the first run) adds an entry to `~/.config/autostart`.
 
-- Extensive customization options
-- Location-based sunrise and sunset times
-- Manual sunrise and sunset times
-- Whitelist for color-sensitive applications
-- Global hotkeys for adjusting on the fly
-- Smooth gamma transitions
-- Minimal performance impact
-- Works without internet connection
+## How it differs from LightBulb on Windows
 
-## Screenshots
+- **Night Light.** LightBulbKDE switches Plasma's Night Light to "Always on" and keeps setting its temperature as the day goes. When LightBulbKDE quits, it leaves Night Light at 6500K, which is no tint at all. To hand Night Light back to Plasma's own schedule, set it to "Sunset to sunrise" in System Settings.
+- **Temperature range.** Night Light only warms the screen, so temperatures run from 1000K to 6500K.
+- **Brightness.** LightBulb's brightness scales gamma-encoded pixel values, while KWin's dimming scales light, so LightBulbKDE sets the dimming to the brightness raised to the power 2.2. A brightness setting therefore looks about the same as it does on Windows. KWin moves in whole percent steps and never dims all the way to black.
+- **The brightness slider.** Plasma's brightness slider keeps working, and LightBulbKDE's dimming applies on top of it. Each slider change makes Plasma reset the dimming, which LightBulbKDE puts back within about 150 ms, so the screen can flash slightly brighter while you drag the slider at night.
+- **Dim automatically.** Plasma's power management dims idle screens through the same multiplier, so turn off "Dim automatically" in System Settings > Power Management, or the two will undo each other.
+- **Suspend.** The Suspend switch next to Night Light in Plasma's Brightness and Color applet pauses LightBulbKDE, brightness included.
+- **Gamma polling** becomes a check of KWin's actual settings every second instead of every five.
+- **Not available on Linux:** the application whitelist, pausing when an application is fullscreen, global hotkeys and auto-update. All four depend on the Windows API, so their settings are hidden.
 
-![dashboard](.assets/dashboard.png)
-![settings](.assets/settings.png)
+## License
+
+MIT, as upstream. See [License.txt](License.txt).
