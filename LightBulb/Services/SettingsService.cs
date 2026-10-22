@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Text.Json.Serialization;
 using Cogwheel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +10,7 @@ using LightBulb.Framework;
 using LightBulb.Localization;
 using LightBulb.Models;
 using LightBulb.PlatformInterop;
+using LightBulb.PlatformInterop.Kde;
 using Microsoft.Win32;
 
 namespace LightBulb.Services;
@@ -17,19 +19,27 @@ namespace LightBulb.Services;
 public partial class SettingsService()
     : SettingsBase(StartOptions.Current.SettingsPath, SerializerContext.Default)
 {
-    private readonly RegistrySwitch<int> _extendedGammaRangeSwitch = new(
-        RegistryHive.LocalMachine,
-        @"Software\Microsoft\Windows NT\CurrentVersion\ICM",
-        "GdiICMGammaRange",
-        256
-    );
+    private readonly RegistrySwitch<int>? _extendedGammaRangeSwitch = OperatingSystem.IsWindows()
+        ? new(
+            RegistryHive.LocalMachine,
+            @"Software\Microsoft\Windows NT\CurrentVersion\ICM",
+            "GdiICMGammaRange",
+            256
+        )
+        : null;
 
-    private readonly RegistrySwitch<string> _autoStartSwitch = new(
-        RegistryHive.CurrentUser,
-        @"Software\Microsoft\Windows\CurrentVersion\Run",
-        Program.Name,
-        $"\"{Program.ExecutableFilePath}\" {StartOptions.IsInitiallyHiddenArgument}"
-    );
+    private readonly RegistrySwitch<string>? _autoStartSwitch = OperatingSystem.IsWindows()
+        ? new(
+            RegistryHive.CurrentUser,
+            @"Software\Microsoft\Windows\CurrentVersion\Run",
+            Program.Name,
+            $"\"{Program.ExecutableFilePath}\" {StartOptions.IsInitiallyHiddenArgument}"
+        )
+        : null;
+
+    private readonly XdgAutoStartSwitch? _xdgAutoStartSwitch = OperatingSystem.IsLinux()
+        ? new(Program.Name, Program.ExecutableFilePath, StartOptions.IsInitiallyHiddenArgument)
+        : null;
 
     [ObservableProperty]
     public partial bool IsFirstTimeExperienceEnabled { get; set; } = true;
@@ -43,9 +53,12 @@ public partial class SettingsService()
 
     // General
 
-    public double MinimumTemperature => 500;
+    // On KDE Plasma, Night Light does the tinting and only goes from 1000K up to neutral
+    public double MinimumTemperature =>
+        OperatingSystem.IsLinux() ? KdeColorController.MinimumTemperature : 500;
 
-    public double MaximumTemperature => 20_000;
+    public double MaximumTemperature =>
+        OperatingSystem.IsLinux() ? KdeColorController.MaximumTemperature : 20_000;
 
     public double MinimumBrightness => 0.1;
 
@@ -165,17 +178,32 @@ public partial class SettingsService()
         base.Save();
 
         // Update values in the registry
-        try
+        if (OperatingSystem.IsWindows())
         {
-            _extendedGammaRangeSwitch.IsSet = IsExtendedGammaRangeUnlocked;
-            _autoStartSwitch.IsSet = IsAutoStartEnabled;
+            try
+            {
+                _extendedGammaRangeSwitch?.IsSet = IsExtendedGammaRangeUnlocked;
+                _autoStartSwitch?.IsSet = IsAutoStartEnabled;
+            }
+            catch (Win32Exception)
+            {
+                // This can happen if the user doesn't have the necessary permissions to update
+                // the corresponding registry keys, and privilege elevation has failed.
+                // Throwing an exception here is very messy, so we'll just ignore it.
+                // https://github.com/Tyrrrz/LightBulb/issues/335
+            }
         }
-        catch (Win32Exception)
+        // Update the autostart entry
+        else if (OperatingSystem.IsLinux())
         {
-            // This can happen if the user doesn't have the necessary permissions to update
-            // the corresponding registry keys, and privilege elevation has failed.
-            // Throwing an exception here is very messy, so we'll just ignore it.
-            // https://github.com/Tyrrrz/LightBulb/issues/335
+            try
+            {
+                _xdgAutoStartSwitch?.IsSet = IsAutoStartEnabled;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Same as above: not worth failing the whole save over
+            }
         }
 
         // Trigger UI updates
@@ -187,8 +215,17 @@ public partial class SettingsService()
         var wasLoaded = base.Load();
 
         // Get values from the registry
-        IsExtendedGammaRangeUnlocked = _extendedGammaRangeSwitch.IsSet;
-        IsAutoStartEnabled = _autoStartSwitch.IsSet;
+        if (OperatingSystem.IsWindows())
+        {
+            IsExtendedGammaRangeUnlocked = _extendedGammaRangeSwitch?.IsSet == true;
+            IsAutoStartEnabled = _autoStartSwitch?.IsSet == true;
+        }
+        else
+        {
+            // The gamma range limit is a Windows setting, so there is nothing to unlock elsewhere
+            IsExtendedGammaRangeUnlocked = true;
+            IsAutoStartEnabled = OperatingSystem.IsLinux() && _xdgAutoStartSwitch?.IsSet == true;
+        }
 
         // Trigger UI updates
         OnPropertyChanged(string.Empty);

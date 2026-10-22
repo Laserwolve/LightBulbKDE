@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using LightBulb.Models;
 using LightBulb.PlatformInterop;
 
@@ -20,6 +21,7 @@ public class ExternalApplicationService
         "StartMenuExperienceHost",
     };
 
+    [SupportedOSPlatform("windows")]
     public IEnumerable<ExternalApplication> GetAllRunningApplications()
     {
         foreach (var window in Window.GetAll())
@@ -47,6 +49,7 @@ public class ExternalApplicationService
         }
     }
 
+    [SupportedOSPlatform("windows")]
     public ExternalApplication? TryGetForegroundApplication()
     {
         using var window = Window.TryGetForeground();
@@ -59,6 +62,7 @@ public class ExternalApplicationService
             : null;
     }
 
+    [SupportedOSPlatform("windows")]
     public bool IsForegroundApplicationFullScreen()
     {
         using var window = Window.TryGetForeground();

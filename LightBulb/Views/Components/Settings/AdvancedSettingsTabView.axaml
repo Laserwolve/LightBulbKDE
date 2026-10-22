@@ -89,6 +89,7 @@
     <!--  Pause when full screen  -->
     <Grid
       ColumnDefinitions="*,Auto"
+      IsVisible="{Binding IsPauseWhenFullScreenSupported}"
       ToolTip.Tip="{Binding LocalizationManager.PauseWhenFullscreenTooltip}"
     >
       <TextBlock

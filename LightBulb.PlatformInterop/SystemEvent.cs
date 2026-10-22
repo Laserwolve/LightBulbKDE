@@ -1,8 +1,10 @@
 using System;
+using System.Runtime.Versioning;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class SystemEvent(int eventId, Action callback) : IDisposable
 {
     private readonly IDisposable _wndProcRegistration = WndProcSponge.Default.Listen(

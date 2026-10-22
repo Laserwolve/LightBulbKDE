@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class Monitor(nint handle) : NativeResource(handle)
 {
     private MonitorInfoEx? TryGetMonitorInfo()

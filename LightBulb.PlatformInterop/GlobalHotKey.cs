@@ -1,11 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class GlobalHotKey : NativeResource<int>
 {
     private readonly object _lock = new();

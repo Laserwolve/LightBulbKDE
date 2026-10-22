@@ -46,6 +46,8 @@ public partial class LocalizationManager
             [nameof(LanguageTooltip)] = "Preferred user interface language",
             [nameof(StartWithWindowsLabel)] = "Start with Windows",
             [nameof(StartWithWindowsTooltip)] = "Launch LightBulb at Windows startup",
+            [nameof(StartAtLoginLabel)] = "Start at login",
+            [nameof(StartAtLoginTooltip)] = "Launch LightBulbKDE when you log in",
             [nameof(AutoUpdateLabel)] = "Auto-update",
             [nameof(AutoUpdateTooltip)] =
                 "Keep LightBulb updated by automatically installing new versions as they become available",
@@ -192,5 +194,11 @@ public partial class LocalizationManager
                 Press OK to open settings.
                 """,
             [nameof(OkButton)] = "OK",
+            [nameof(KdeRequiredTitle)] = "KDE Plasma not found",
+            [nameof(KdeRequiredMessage)] = """
+                {0} changes the screen through KDE Plasma's Night Light and display settings, using the kwriteconfig6 and kscreen-doctor tools that come with Plasma 6.
+
+                They could not be found, so {0} can't change the screen.
+                """,
         };
 }

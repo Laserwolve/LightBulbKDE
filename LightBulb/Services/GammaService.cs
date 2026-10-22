@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Versioning;
 using LightBulb.Core;
 using LightBulb.PlatformInterop;
+using LightBulb.PlatformInterop.Kde;
 using PowerKit;
 using PowerKit.Extensions;
 
@@ -23,42 +25,56 @@ public partial class GammaService : IDisposable
     private ColorConfiguration? _lastConfiguration;
     private DateTimeOffset _lastUpdateTimestamp = DateTimeOffset.MinValue;
 
+    // On KDE Plasma, KWin does the tinting and dimming, and this hands it the values
+    private readonly KdeColorController? _kdeColorController =
+        OperatingSystem.IsLinux() && KdeColorController.IsSupported
+            ? new KdeColorController()
+            : null;
+
     public GammaService(SettingsService settingsService)
     {
         _settingsService = settingsService;
 
         // Listen to all system events that may indicate that the device context or gamma was changed from the outside
-        _eventSubscription = Disposable.Merge(
-            // https://github.com/Tyrrrz/LightBulb/issues/223
-            SystemHook.TryRegister(SystemHook.Ids.ForegroundWindowChanged, InvalidateGamma)
-                ?? Disposable.Null,
-            PowerSettingNotification.TryRegister(
-                PowerSettingNotification.Ids.ConsoleDisplayStateChanged,
-                InvalidateGamma
-            ) ?? Disposable.Null,
-            PowerSettingNotification.TryRegister(
-                PowerSettingNotification.Ids.PowerSavingStatusChanged,
-                InvalidateGamma
-            ) ?? Disposable.Null,
-            PowerSettingNotification.TryRegister(
-                PowerSettingNotification.Ids.SessionDisplayStatusChanged,
-                InvalidateGamma
-            ) ?? Disposable.Null,
-            PowerSettingNotification.TryRegister(
-                PowerSettingNotification.Ids.MonitorPowerStateChanged,
-                InvalidateGamma
-            ) ?? Disposable.Null,
-            PowerSettingNotification.TryRegister(
-                PowerSettingNotification.Ids.AwayModeChanged,
-                InvalidateGamma
-            ) ?? Disposable.Null,
-            SystemEvent.Register(SystemEvent.Ids.DisplayChanged, InvalidateDeviceContexts),
-            SystemEvent.Register(SystemEvent.Ids.PaletteChanged, InvalidateDeviceContexts),
-            SystemEvent.Register(SystemEvent.Ids.SettingsChanged, InvalidateDeviceContexts),
-            SystemEvent.Register(SystemEvent.Ids.SystemColorsChanged, InvalidateDeviceContexts)
-        );
+        _eventSubscription = !OperatingSystem.IsWindows()
+            ? Disposable.Null
+            : Disposable.Merge(
+                // https://github.com/Tyrrrz/LightBulb/issues/223
+                SystemHook.TryRegister(SystemHook.Ids.ForegroundWindowChanged, InvalidateGamma)
+                    ?? Disposable.Null,
+                PowerSettingNotification.TryRegister(
+                    PowerSettingNotification.Ids.ConsoleDisplayStateChanged,
+                    InvalidateGamma
+                ) ?? Disposable.Null,
+                PowerSettingNotification.TryRegister(
+                    PowerSettingNotification.Ids.PowerSavingStatusChanged,
+                    InvalidateGamma
+                ) ?? Disposable.Null,
+                PowerSettingNotification.TryRegister(
+                    PowerSettingNotification.Ids.SessionDisplayStatusChanged,
+                    InvalidateGamma
+                ) ?? Disposable.Null,
+                PowerSettingNotification.TryRegister(
+                    PowerSettingNotification.Ids.MonitorPowerStateChanged,
+                    InvalidateGamma
+                ) ?? Disposable.Null,
+                PowerSettingNotification.TryRegister(
+                    PowerSettingNotification.Ids.AwayModeChanged,
+                    InvalidateGamma
+                ) ?? Disposable.Null,
+                SystemEvent.Register(SystemEvent.Ids.DisplayChanged, InvalidateDeviceContexts),
+                SystemEvent.Register(SystemEvent.Ids.PaletteChanged, InvalidateDeviceContexts),
+                SystemEvent.Register(SystemEvent.Ids.SettingsChanged, InvalidateDeviceContexts),
+                SystemEvent.Register(SystemEvent.Ids.SystemColorsChanged, InvalidateDeviceContexts)
+            );
     }
 
+    // Whether something outside LightBulb has paused it, which on KDE Plasma is Night Light's own
+    // Suspend switch in the Brightness and Color applet
+    public bool IsPausedExternally =>
+        OperatingSystem.IsLinux() && _kdeColorController is { IsNightLightSuspended: true };
+
+    [SupportedOSPlatform("windows")]
     private void EnsureValidDeviceContexts()
     {
         if (_areDeviceContextsValid)
@@ -135,9 +151,32 @@ public partial class GammaService : IDisposable
 
     public void SetGamma(ColorConfiguration configuration)
     {
+        var isStale = IsGammaStale();
+
         // Avoid unnecessary changes as updating too often will cause stuttering
-        if (!IsGammaStale() && !IsSignificantChange(configuration))
+        if (!isStale && !IsSignificantChange(configuration))
             return;
+
+        if (!OperatingSystem.IsWindows())
+        {
+            if (OperatingSystem.IsLinux() && _kdeColorController is not null)
+            {
+                _kdeColorController.SetConfiguration(
+                    configuration.Temperature,
+                    configuration.Brightness
+                );
+
+                // Gamma polling and invalidation become a check of KWin's actual state
+                if (isStale)
+                    _kdeColorController.Refresh();
+            }
+
+            _lastConfiguration = configuration;
+            _lastUpdateTimestamp = DateTimeOffset.Now;
+            Debug.WriteLine($"Updated color configuration to {configuration}.");
+
+            return;
+        }
 
         EnsureValidDeviceContexts();
 
@@ -162,8 +201,15 @@ public partial class GammaService : IDisposable
     public void Dispose()
     {
         // Reset gamma on all contexts
-        foreach (var deviceContext in _deviceContexts)
-            deviceContext.ResetGamma();
+        if (OperatingSystem.IsWindows())
+        {
+            foreach (var deviceContext in _deviceContexts)
+                deviceContext.ResetGamma();
+        }
+
+        // Reset KWin's tint and dimming
+        if (OperatingSystem.IsLinux())
+            _kdeColorController?.Dispose();
 
         _eventSubscription.Dispose();
         Disposable.Merge(_deviceContexts).Dispose();

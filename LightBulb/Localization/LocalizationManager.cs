@@ -127,8 +127,13 @@ public partial class LocalizationManager
     public string ThemeTooltip => Get();
     public string LanguageLabel => Get();
     public string LanguageTooltip => Get();
-    public string StartWithWindowsLabel => Get();
-    public string StartWithWindowsTooltip => Get();
+
+    // Outside Windows, the same switch adds an autostart entry for the desktop's login
+    public string StartWithWindowsLabel => OperatingSystem.IsWindows() ? Get() : StartAtLoginLabel;
+    public string StartWithWindowsTooltip =>
+        OperatingSystem.IsWindows() ? Get() : StartAtLoginTooltip;
+    public string StartAtLoginLabel => Get();
+    public string StartAtLoginTooltip => Get();
     public string AutoUpdateLabel => Get();
     public string AutoUpdateTooltip => Get();
     public string DefaultToDayConfigLabel => Get();
@@ -233,4 +238,6 @@ public partial class LocalizationManager
     public string WelcomeTitle => Get();
     public string WelcomeMessage => Get();
     public string OkButton => Get();
+    public string KdeRequiredTitle => Get();
+    public string KdeRequiredMessage => Get();
 }

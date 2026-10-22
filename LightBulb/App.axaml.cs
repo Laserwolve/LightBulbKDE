@@ -53,10 +53,18 @@ public partial class App : Application, IDisposable
         services.AddTransient<MessageBoxViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<SettingsTabViewModelBase, AdvancedSettingsTabViewModel>();
-        services.AddTransient<SettingsTabViewModelBase, ApplicationWhitelistSettingsTabViewModel>();
         services.AddTransient<SettingsTabViewModelBase, GeneralSettingsTabViewModel>();
-        services.AddTransient<SettingsTabViewModelBase, HotKeySettingsTabViewModel>();
         services.AddTransient<SettingsTabViewModelBase, LocationSettingsTabViewModel>();
+
+        // Application whitelisting and global hotkeys go through the Windows API
+        if (OperatingSystem.IsWindows())
+        {
+            services.AddTransient<
+                SettingsTabViewModelBase,
+                ApplicationWhitelistSettingsTabViewModel
+            >();
+            services.AddTransient<SettingsTabViewModelBase, HotKeySettingsTabViewModel>();
+        }
 
         _services = services.BuildServiceProvider(true);
         _settingsService = _services.GetRequiredService<SettingsService>();

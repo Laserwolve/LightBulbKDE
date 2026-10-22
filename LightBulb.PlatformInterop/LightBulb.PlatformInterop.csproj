@@ -2,5 +2,6 @@
   <ItemGroup>
     <PackageReference Include="CSharpier.MsBuild" PrivateAssets="all" />
     <PackageReference Include="PowerKit" />
+    <PackageReference Include="Tmds.DBus.Protocol" />
   </ItemGroup>
 </Project>

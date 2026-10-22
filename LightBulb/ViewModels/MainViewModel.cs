@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using LightBulb.Framework;
 using LightBulb.Localization;
 using LightBulb.PlatformInterop;
+using LightBulb.PlatformInterop.Kde;
 using LightBulb.Services;
 using LightBulb.Utils.Extensions;
 using LightBulb.ViewModels.Components;
@@ -134,6 +135,19 @@ public partial class MainViewModel(
         settingsService.Save();
     }
 
+    private async Task ShowKdeRequiredMessageAsync()
+    {
+        if (!OperatingSystem.IsLinux() || KdeColorController.IsSupported)
+            return;
+
+        var dialog = viewModelManager.GetMessageBoxViewModel(
+            LocalizationManager.KdeRequiredTitle,
+            string.Format(LocalizationManager.KdeRequiredMessage, Program.Name)
+        );
+
+        await dialogManager.ShowDialogAsync(dialog);
+    }
+
     private async Task ShowFirstTimeExperienceMessageAsync()
     {
         if (!settingsService.IsFirstTimeExperienceEnabled)
@@ -172,6 +186,7 @@ public partial class MainViewModel(
         await ShowUkraineSupportMessageAsync();
         await ShowDevelopmentBuildMessageAsync();
         await ShowGammaRangeMessageAsync();
+        await ShowKdeRequiredMessageAsync();
         await ShowFirstTimeExperienceMessageAsync();
 
         _checkForUpdatesTimer.Start();

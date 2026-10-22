@@ -52,8 +52,15 @@ public partial class DashboardViewModel : ViewModelBase
         _eventSubscription = Disposable.Merge(
             // Invalidate the cached local time zone when the system clock or time zone changes
             // https://github.com/Tyrrrz/LightBulb/issues/465
-            SystemEvent.Register(SystemEvent.Ids.TimeChanged, TimeZoneInfo.ClearCachedData),
-            SystemEvent.Register(SystemEvent.Ids.SettingsChanged, TimeZoneInfo.ClearCachedData),
+            OperatingSystem.IsWindows()
+                ? SystemEvent.Register(SystemEvent.Ids.TimeChanged, TimeZoneInfo.ClearCachedData)
+                : Disposable.Null,
+            OperatingSystem.IsWindows()
+                ? SystemEvent.Register(
+                    SystemEvent.Ids.SettingsChanged,
+                    TimeZoneInfo.ClearCachedData
+                )
+                : Disposable.Null,
             this.WatchProperty(
                 o => o.IsEnabled,
                 v =>
@@ -423,6 +430,14 @@ public partial class DashboardViewModel : ViewModelBase
 
     private void UpdateIsPaused()
     {
+        // Detecting fullscreen and whitelisted applications reads Windows' window list, so
+        // elsewhere only the desktop's own switch can pause LightBulb
+        if (!OperatingSystem.IsWindows())
+        {
+            IsPaused = _gammaService.IsPausedExternally;
+            return;
+        }
+
         bool IsPausedByFullScreen() =>
             _settingsService.IsPauseWhenFullScreenEnabled
             && _externalApplicationService.IsForegroundApplicationFullScreen();

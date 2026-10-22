@@ -15,6 +15,10 @@ public class HotKeyService : IDisposable
 
     public void RegisterHotKey(HotKey hotKey, Action callback)
     {
+        // Global hotkeys are registered through the Windows API, and only exist there
+        if (!OperatingSystem.IsWindows())
+            return;
+
         // Convert Avalonia key/modifiers to Windows API virtual key/modifiers
         var virtualKey = KeyInterop.VirtualKeyFromKey(hotKey.Key.ToQwertyKey());
         var modifiers = (int)hotKey.Modifiers;
@@ -29,6 +33,10 @@ public class HotKeyService : IDisposable
 
     public void UnregisterAllHotKeys()
     {
+        // Nothing gets registered elsewhere
+        if (!OperatingSystem.IsWindows())
+            return;
+
         Disposable.Merge(_hotKeyRegistrations).Dispose();
         _hotKeyRegistrations.Clear();
     }

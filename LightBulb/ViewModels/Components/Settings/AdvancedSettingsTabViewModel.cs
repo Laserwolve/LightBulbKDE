@@ -55,6 +55,9 @@ public class AdvancedSettingsTabViewModel(
         set => SettingsService.IsConfigurationSmoothingEnabled = value;
     }
 
+    // Detecting a fullscreen application reads Windows' window list
+    public bool IsPauseWhenFullScreenSupported { get; } = OperatingSystem.IsWindows();
+
     public bool IsPauseWhenFullScreenEnabled
     {
         get => SettingsService.IsPauseWhenFullScreenEnabled;

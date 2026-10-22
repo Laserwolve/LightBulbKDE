@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Threading;
 using LightBulb.PlatformInterop.Utils;
@@ -8,6 +9,7 @@ using PowerKit.Extensions;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public class RegistrySwitch<T>(RegistryHive hive, string keyName, string entryName, T enabledValue)
     where T : notnull
 {

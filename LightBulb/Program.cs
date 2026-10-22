@@ -1,8 +1,10 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
+using Avalonia.Threading;
 using LightBulb.PlatformInterop;
 
 namespace LightBulb;
@@ -21,10 +23,13 @@ public static class Program
 
     public static string ExecutableDirPath { get; } = AppContext.BaseDirectory;
 
+    // Outside Windows the app's launcher has no extension, and the process path is what names it
     public static string ExecutableFilePath { get; } =
-        Path.ChangeExtension(Assembly.Location, "exe");
+        OperatingSystem.IsWindows()
+            ? Path.ChangeExtension(Assembly.Location, "exe")
+            : Environment.ProcessPath ?? Path.ChangeExtension(Assembly.Location, null);
 
-    public static string ProjectUrl { get; } = "https://github.com/Tyrrrz/LightBulb";
+    public static string ProjectUrl { get; } = "https://github.com/Laserwolve/LightBulbKDE";
 
     public static string ProjectReleasesUrl { get; } = $"{ProjectUrl}/releases";
 
@@ -45,6 +50,12 @@ public static class Program
             )
             .LogToTrace();
 
+    private static void OnTerminationRequested(PosixSignalContext context)
+    {
+        context.Cancel = true;
+        Dispatcher.UIThread.Post(() => App.Shutdown());
+    }
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -58,6 +69,16 @@ public static class Program
         if (!isOnlyRunningInstance)
             return 1;
 
+        // Logging out ends apps with SIGTERM, which would otherwise exit without the cleanup
+        // that leaves the screen untinted and undimmed
+        using var terminationRegistration = !OperatingSystem.IsWindows()
+            ? PosixSignalRegistration.Create(PosixSignal.SIGTERM, OnTerminationRequested)
+            : null;
+
+        using var interruptionRegistration = !OperatingSystem.IsWindows()
+            ? PosixSignalRegistration.Create(PosixSignal.SIGINT, OnTerminationRequested)
+            : null;
+
         // Build and run the app
         var builder = BuildAvaloniaApp();
 
@@ -67,7 +88,11 @@ public static class Program
         }
         catch (Exception ex)
         {
-            MessageBox.ShowError("Fatal Error", ex.ToString());
+            if (OperatingSystem.IsWindows())
+                MessageBox.ShowError("Fatal Error", ex.ToString());
+            else
+                Console.Error.WriteLine(ex);
+
             throw;
         }
         finally

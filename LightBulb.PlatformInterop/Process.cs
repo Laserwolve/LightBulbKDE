@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class Process(nint handle) : NativeResource(handle)
 {
     public string? TryGetExecutableFilePath()

@@ -47,9 +47,12 @@ public partial class StartOptions
                         )
                         // Can write to the program directory
                         : Path.Combine(Program.ExecutableDirPath, "Settings.json"),
-            IsAutoUpdateAllowed = !(
-                Environment.GetEnvironmentVariable("LIGHTBULB_ALLOW_AUTO_UPDATE") is { } env
-                && env.Equals("false", StringComparison.OrdinalIgnoreCase)
-            ),
+            // The updater installs upstream's Windows release packages, so it only runs there
+            IsAutoUpdateAllowed =
+                OperatingSystem.IsWindows()
+                && !(
+                    Environment.GetEnvironmentVariable("LIGHTBULB_ALLOW_AUTO_UPDATE") is { } env
+                    && env.Equals("false", StringComparison.OrdinalIgnoreCase)
+                ),
         };
 }

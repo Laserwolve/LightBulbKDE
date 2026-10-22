@@ -52,6 +52,10 @@ public partial class ApplicationWhitelistSettingsTabViewModel : SettingsTabViewM
     [RelayCommand(CanExecute = nameof(CanRefreshApplications))]
     private void RefreshApplications()
     {
+        // Running applications are read from Windows' window list
+        if (!OperatingSystem.IsWindows())
+            return;
+
         var applications = new HashSet<ExternalApplication>();
 
         // Add previously whitelisted applications

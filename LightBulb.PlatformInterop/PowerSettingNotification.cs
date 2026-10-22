@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class PowerSettingNotification(nint handle, Guid powerSettingId, Action callback)
     : NativeResource(handle)
 {

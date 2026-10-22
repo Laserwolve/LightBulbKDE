@@ -1,10 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using LightBulb.PlatformInterop.Internal;
 
 namespace LightBulb.PlatformInterop;
 
+[SupportedOSPlatform("windows")]
 public partial class SystemHook(nint handle, Delegate winEventProc) : NativeResource(handle)
 {
     // We only need the reference to the delegate to prevent it from being garbage collected too early
