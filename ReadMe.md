@@ -19,19 +19,6 @@ On Windows, use [upstream LightBulb](https://github.com/Tyrrrz/LightBulb/release
 
 ![dashboard](.assets/dashboard-kde.png)
 
-## Terms of use<sup>[[?]](https://github.com/Tyrrrz/.github/blob/prime/docs/why-so-political.md)</sup>
-
-These are upstream LightBulb's terms, and they carry over to this fork.
-
-By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all the following statements:
-
-- You **condemn Russia and its military aggression against Ukraine**
-- You **recognize that Russia is an occupant that unlawfully invaded a sovereign state**
-- You **support Ukraine's territorial integrity, including its claims over temporarily occupied territories of Crimea and Donbas**
-- You **reject false narratives perpetuated by Russian state propaganda**
-
-To learn more about the war and how you can help, [click here](https://tyrrrz.me/ukraine). Glory to Ukraine! 🇺🇦
-
 ## Requirements
 
 - KDE Plasma 6 in a Wayland session (developed on Plasma 6.6)
