@@ -153,13 +153,6 @@ public partial class LocalizationManager
             """,
         [nameof(InstallButton)] = "INSTALLIEREN",
         [nameof(CloseButton)] = "SCHLIESSEN",
-        [nameof(UkraineSupportTitle)] = "Danke für Ihre Unterstützung der Ukraine!",
-        [nameof(UkraineSupportMessage)] = """
-            Während Russland einen Vernichtungskrieg gegen mein Land führt, bin ich jedem dankbar, der weiterhin an der Seite der Ukraine in unserem Kampf für die Freiheit steht.
-
-            Klicken Sie auf MEHR ERFAHREN, um Möglichkeiten der Unterstützung zu finden.
-            """,
-        [nameof(LearnMoreButton)] = "MEHR ERFAHREN",
         [nameof(UnstableBuildTitle)] = "Warnung: Instabiler Build",
         [nameof(UnstableBuildMessage)] = """
             Sie verwenden einen Entwicklungs-Build von {0}. Diese Builds wurden nicht gründlich getestet und können Fehler enthalten.

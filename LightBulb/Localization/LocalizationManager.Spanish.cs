@@ -152,13 +152,6 @@ public partial class LocalizationManager
                 """,
             [nameof(InstallButton)] = "INSTALAR",
             [nameof(CloseButton)] = "CERRAR",
-            [nameof(UkraineSupportTitle)] = "¡Gracias por apoyar a Ucrania!",
-            [nameof(UkraineSupportMessage)] = """
-                Mientras Rusia libra una guerra genocida contra mi país, estoy agradecido a todos los que continúan apoyando a Ucrania en nuestra lucha por la libertad.
-
-                Haz clic en MÁS INFORMACIÓN para encontrar formas de ayudar.
-                """,
-            [nameof(LearnMoreButton)] = "MÁS INFORMACIÓN",
             [nameof(UnstableBuildTitle)] = "Advertencia de compilación inestable",
             [nameof(UnstableBuildMessage)] = """
                 Estás usando una compilación de desarrollo de {0}. Estas compilaciones no han sido probadas exhaustivamente y pueden contener errores.

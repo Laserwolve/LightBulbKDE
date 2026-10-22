@@ -151,13 +151,6 @@ public partial class LocalizationManager
                 """,
             [nameof(InstallButton)] = "ВСТАНОВИТИ",
             [nameof(CloseButton)] = "ЗАКРИТИ",
-            [nameof(UkraineSupportTitle)] = "Дякуємо за підтримку України!",
-            [nameof(UkraineSupportMessage)] = """
-                Поки Росія веде геноцидну війну проти моєї країни, я вдячний кожному, хто продовжує підтримувати Україну в нашій боротьбі за свободу.
-
-                Натисніть ДІЗНАТИСЯ БІЛЬШЕ, щоб знайти способи допомоги.
-                """,
-            [nameof(LearnMoreButton)] = "ДІЗНАТИСЯ БІЛЬШЕ",
             [nameof(UnstableBuildTitle)] = "Попередження про нестабільну збірку",
             [nameof(UnstableBuildMessage)] = """
                 Ви використовуєте збірку розробника {0}. Ці збірки не пройшли ретельного тестування і можуть містити помилки.

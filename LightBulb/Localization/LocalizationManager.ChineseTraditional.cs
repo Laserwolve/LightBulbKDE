@@ -147,13 +147,6 @@ public partial class LocalizationManager
                 """,
             [nameof(InstallButton)] = "安裝",
             [nameof(CloseButton)] = "關閉",
-            [nameof(UkraineSupportTitle)] = "感謝您支援烏克蘭！",
-            [nameof(UkraineSupportMessage)] = """
-                在俄羅斯對我國發動種族滅絕戰爭之際，我非常感謝所有在我們爭取自由的鬥爭中繼續與烏克蘭站在一起的人。
-
-                點擊瞭解更多以尋找您可以提供幫助的方式。
-                """,
-            [nameof(LearnMoreButton)] = "瞭解更多",
             [nameof(UnstableBuildTitle)] = "不穩定版本警告",
             [nameof(UnstableBuildMessage)] = """
                 您正在使用 {0} 的開發版本。這些版本尚未經過充分測試，可能包含 Bug。

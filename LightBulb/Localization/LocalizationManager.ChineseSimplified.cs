@@ -154,13 +154,6 @@ public partial class LocalizationManager
                 """,
             [nameof(InstallButton)] = "安装",
             [nameof(CloseButton)] = "关闭",
-            [nameof(UkraineSupportTitle)] = "感谢您支持乌克兰！",
-            [nameof(UkraineSupportMessage)] = """
-                当俄罗斯对我的国家发动种族灭绝战争时，我感激每一位继续站在乌克兰一边、支持我们争取自由斗争的人。
-
-                大眼仔选择保持中立，受伤害的最终是平民百姓。点击“了解更多”查找您可以提供帮助的方式。
-                """,
-            [nameof(LearnMoreButton)] = "了解更多",
             [nameof(UnstableBuildTitle)] = "不稳定版本警告",
             [nameof(UnstableBuildMessage)] = """
                 您正在使用 {0} 的开发版本。这些版本未经过充分测试，可能包含错误。

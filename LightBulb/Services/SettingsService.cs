@@ -45,9 +45,6 @@ public partial class SettingsService()
     public partial bool IsFirstTimeExperienceEnabled { get; set; } = true;
 
     [ObservableProperty]
-    public partial bool IsUkraineSupportMessageEnabled { get; set; } = true;
-
-    [ObservableProperty]
     [JsonIgnore] // comes from registry
     public partial bool IsExtendedGammaRangeUnlocked { get; set; }
 
@@ -162,7 +159,6 @@ public partial class SettingsService()
 
         // Don't reset the first-time experience
         IsFirstTimeExperienceEnabled = false;
-        IsUkraineSupportMessageEnabled = false;
 
         // Trigger UI updates
         OnPropertyChanged(string.Empty);

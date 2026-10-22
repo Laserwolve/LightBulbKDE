@@ -226,9 +226,6 @@ public partial class LocalizationManager
     public string UpdateAvailableMessage => Get();
     public string InstallButton => Get();
     public string CloseButton => Get();
-    public string UkraineSupportTitle => Get();
-    public string UkraineSupportMessage => Get();
-    public string LearnMoreButton => Get();
     public string UnstableBuildTitle => Get();
     public string UnstableBuildMessage => Get();
     public string SeeReleasesButton => Get();

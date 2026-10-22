@@ -76,26 +76,6 @@ public partial class MainViewModel(
         App.Shutdown(2);
     }
 
-    private async Task ShowUkraineSupportMessageAsync()
-    {
-        if (!settingsService.IsUkraineSupportMessageEnabled)
-            return;
-
-        var dialog = viewModelManager.GetMessageBoxViewModel(
-            LocalizationManager.UkraineSupportTitle,
-            LocalizationManager.UkraineSupportMessage,
-            LocalizationManager.LearnMoreButton,
-            LocalizationManager.CloseButton
-        );
-
-        // Disable this message in the future
-        settingsService.IsUkraineSupportMessageEnabled = false;
-        settingsService.Save();
-
-        if (await dialogManager.ShowDialogAsync(dialog) == true)
-            Process.StartShellExecute("https://tyrrrz.me/ukraine?source=lightbulb");
-    }
-
     private async Task ShowDevelopmentBuildMessageAsync()
     {
         if (!Program.IsDevelopmentBuild)
@@ -183,7 +163,6 @@ public partial class MainViewModel(
 
         await FinalizePendingUpdateAsync();
 
-        await ShowUkraineSupportMessageAsync();
         await ShowDevelopmentBuildMessageAsync();
         await ShowGammaRangeMessageAsync();
         await ShowKdeRequiredMessageAsync();
