@@ -43,7 +43,10 @@ public class XdgAutoStartSwitch(string name, string executableFilePath, string a
 
                 if (value)
                 {
+                    // The entry may be a symlink into someone's dotfiles, and replacing it beats
+                    // writing through it
                     Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+                    File.Delete(FilePath);
                     File.WriteAllText(
                         FilePath,
                         $"""
