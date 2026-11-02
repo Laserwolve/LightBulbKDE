@@ -89,13 +89,14 @@ public class AmbientLightSpecs
 
     [Theory]
     [InlineData(0, 4500, 0.1)]
-    [InlineData(0.05, 4517, 0.1)]
-    [InlineData(0.5, 5160, 0.33)]
-    [InlineData(0.9, 6190, 0.8)]
+    [InlineData(0.05, 4600, 0.1)]
+    [InlineData(0.3, 5100, 0.3)]
+    [InlineData(0.5, 5500, 0.5)]
+    [InlineData(0.9, 6300, 0.8)]
     [InlineData(1, 6500, 0.8)]
     [InlineData(1.5, 6500, 0.8)]
     [InlineData(-0.5, 4500, 0.1)]
-    public void I_observe_the_room_as_the_brightness_bent_like_a_phone_and_held_between_the_two_settings(
+    public void I_observe_the_room_as_the_brightness_held_between_the_two_settings(
         double level,
         double expectedTemperature,
         double expectedBrightness

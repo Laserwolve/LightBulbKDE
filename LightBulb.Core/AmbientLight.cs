@@ -13,10 +13,6 @@ public static class AmbientLight
     // the exposure carries the rest.
     public const double CameraGamma = 1.6;
 
-    // Phones keep a room of middling light dimmer than a straight line from dark to bright would,
-    // and so does this: the level is raised to this power before it drives the screen
-    public const double LevelCurve = 1.6;
-
     // The screen's light goes with its dimming, which KWin applies to light rather than to the
     // gamma-encoded brightness, so the glow the camera sees goes with the brightness to this power
     private const double DisplayGamma = 2.2;
@@ -91,17 +87,16 @@ public static class AmbientLight
         return Math.Clamp((stops - darkStops) / (brightStops - darkStops), 0, 1);
     }
 
-    // The screen's settings for a level of light in the room. The level is bent the way a phone's
-    // is, and then the brightness is the level itself, so that the screen is as bright as the room,
-    // held between the two brightness settings, while the temperature runs from the dark room's to
-    // the bright room's.
+    // The screen's settings for a level of light in the room: the brightness is the level itself,
+    // so that the screen is as bright as the room, held between the two brightness settings, while
+    // the temperature runs from the dark room's to the bright room's
     public static ColorConfiguration GetConfiguration(
         double level,
         ColorConfiguration darkConfiguration,
         ColorConfiguration brightConfiguration
     )
     {
-        var fraction = Math.Pow(Math.Clamp(level, 0, 1), LevelCurve);
+        var fraction = Math.Clamp(level, 0, 1);
 
         return new ColorConfiguration(
             darkConfiguration.Temperature
