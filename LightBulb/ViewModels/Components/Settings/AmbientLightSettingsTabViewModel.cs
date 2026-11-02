@@ -96,6 +96,13 @@ public partial class AmbientLightSettingsTabViewModel : SettingsTabViewModelBase
             );
     }
 
+    // How bright the screen is next to the room, as a multiple of the room's level
+    public double BrightnessScale
+    {
+        get => SettingsService.AmbientLightBrightnessScale;
+        set => SettingsService.AmbientLightBrightnessScale = value.Clamp(0.5, 2);
+    }
+
     // The latest reading, from 0 at the dark reference to 1 at the bright one
     public double? Level =>
         _ambientLightService.LatestStops is { } stops

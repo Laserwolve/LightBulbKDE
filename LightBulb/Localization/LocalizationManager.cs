@@ -157,6 +157,8 @@ public partial class LocalizationManager
     public string AmbientLightContinuousTooltip => Get();
     public string AmbientLightIntervalLabel => Get();
     public string AmbientLightIntervalTooltip => Get();
+    public string AmbientLightBrightnessScaleLabel => Get();
+    public string AmbientLightBrightnessScaleTooltip => Get();
     public string AmbientLightLevelLabel => Get();
     public string AmbientLightLevelTooltip => Get();
     public string AmbientLightDarkButton => Get();

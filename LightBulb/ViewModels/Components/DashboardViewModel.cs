@@ -320,13 +320,14 @@ public partial class DashboardViewModel : ViewModelBase
         );
 
     // The brightness the room asks for: the night-time brightness in a room as dark as the dark
-    // reference, the day-time brightness in one as bright as the bright reference, and as bright
-    // as the room in between, with the offset on top. Until the first reading comes in, the room
-    // counts as bright.
+    // reference, the day-time brightness in one as bright as the bright reference, and the room's
+    // level times the scale in between, with the offset on top. Until the first reading comes in,
+    // the room counts as bright.
     public double RoomBrightness =>
         Math.Clamp(
             AmbientLight.GetBrightness(
                 AmbientLightLevel ?? 1,
+                _settingsService.AmbientLightBrightnessScale,
                 _settingsService.NightConfiguration.Brightness,
                 _settingsService.DayConfiguration.Brightness
             ) + BrightnessOffset,

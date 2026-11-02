@@ -137,6 +137,11 @@ public partial class SettingsService()
     [ObservableProperty]
     public partial TimeSpan AmbientLightInterval { get; set; } = TimeSpan.FromSeconds(15);
 
+    // How bright the screen is next to the room, as a multiple of the room's level: at 1 the
+    // screen is as bright as the room
+    [ObservableProperty]
+    public partial double AmbientLightBrightnessScale { get; set; } = 1;
+
     // The light, in the camera's own stops, of the darkest room, where the night-time brightness
     // applies, and of the brightest, where the day-time brightness does. The defaults suit a
     // webcam at its default gain for a room lit by little more than its monitors and one lit by

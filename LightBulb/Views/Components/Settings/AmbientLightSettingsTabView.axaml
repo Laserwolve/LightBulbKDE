@@ -95,6 +95,41 @@
       />
     </StackPanel>
 
+    <!--  Screen brightness  -->
+    <StackPanel Orientation="Vertical" Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <ToolTip.Tip>
+          <TextBlock
+            MaxWidth="350"
+            Text="{Binding LocalizationManager.AmbientLightBrightnessScaleTooltip}"
+            TextWrapping="Wrap"
+          />
+        </ToolTip.Tip>
+        <TextBlock
+          Grid.Column="0"
+          VerticalAlignment="Center"
+          Text="{Binding LocalizationManager.AmbientLightBrightnessScaleLabel}"
+          TextTrimming="CharacterEllipsis"
+        />
+        <TextBox
+          Grid.Column="1"
+          MinWidth="24"
+          VerticalAlignment="Center"
+          Text="{Binding BrightnessScale, Converter={x:Static converters:FractionToPercentageStringConverter.Instance}, UpdateSourceTrigger=LostFocus}"
+          Theme="{DynamicResource CompactTextBox}"
+        />
+      </Grid>
+      <Slider
+        IsSnapToTickEnabled="True"
+        LargeChange="0.25"
+        Maximum="2"
+        Minimum="0.5"
+        SmallChange="0.05"
+        TickFrequency="0.05"
+        Value="{Binding BrightnessScale}"
+      />
+    </StackPanel>
+
     <!--  Light in the room  -->
     <StackPanel Orientation="Vertical" Spacing="12">
       <Grid ColumnDefinitions="*,Auto">

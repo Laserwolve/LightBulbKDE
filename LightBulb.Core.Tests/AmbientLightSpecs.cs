@@ -102,7 +102,26 @@ public class AmbientLightSpecs
     )
     {
         // Act
-        var brightness = AmbientLight.GetBrightness(level, 0.1, 0.8);
+        var brightness = AmbientLight.GetBrightness(level, 1, 0.1, 0.8);
+
+        // Assert
+        brightness.Should().BeApproximately(expectedBrightness, 0.005);
+    }
+
+    [Theory]
+    [InlineData(0, 0.1)]
+    [InlineData(0.05, 0.1)]
+    [InlineData(0.4, 0.5)]
+    [InlineData(0.6, 0.75)]
+    [InlineData(0.8, 1)]
+    [InlineData(0.9, 1)]
+    public void I_observe_the_screen_brighter_than_the_room_by_the_scale(
+        double level,
+        double expectedBrightness
+    )
+    {
+        // Act
+        var brightness = AmbientLight.GetBrightness(level, 1.25, 0.1, 1);
 
         // Assert
         brightness.Should().BeApproximately(expectedBrightness, 0.005);

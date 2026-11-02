@@ -21,7 +21,7 @@ public partial class LocalizationManager
             [nameof(ClickToResetLabel)] = "Click to reset",
             [nameof(OffsetLabel)] = "offset",
             [nameof(AmbientLightIndicatorTooltip)] =
-                "The screen is as bright as the room, which is {0} of the way from a dark room to a bright one",
+                "The screen's brightness follows the light in the room, which is {0} of the way from a dark room to a bright one",
             // Main window
             [nameof(ToggleLightBulbTooltip)] = "Toggle LightBulb on/off",
             [nameof(HideToTrayTooltip)] = "Hide LightBulb to the system tray",
@@ -69,7 +69,7 @@ public partial class LocalizationManager
             // Ambient light settings tab
             [nameof(AmbientLightLabel)] = "Follow the room's light",
             [nameof(AmbientLightTooltip)] = """
-                Read the light in the room through the webcam, as a phone reads its light sensor, and set the brightness from it instead of from the time of day: the day-time brightness in a bright room, the night-time brightness in a dark one, and as bright as the room in between. The color temperature still follows sunrise and sunset.
+                Read the light in the room through the webcam, as a phone reads its light sensor, and set the brightness from it instead of from the time of day: the day-time brightness in a bright room, the night-time brightness in a dark one, and in between as bright as the room, scaled by the screen brightness below. The color temperature still follows sunrise and sunset.
 
                 The camera's activity light is on whenever it is being read, and a camera another program has open is left alone.
                 """,
@@ -86,9 +86,12 @@ public partial class LocalizationManager
             [nameof(AmbientLightIntervalLabel)] = "Read every:",
             [nameof(AmbientLightIntervalTooltip)] =
                 "How often the room's light is read while the camera is not kept on. Every reading turns the camera on for a moment, and the screen follows a filtered reading, quickly when the room brightens and slowly when it darkens.",
+            [nameof(AmbientLightBrightnessScaleLabel)] = "Screen brightness:",
+            [nameof(AmbientLightBrightnessScaleTooltip)] =
+                "How bright the screen is for the light in the room: at 100% as bright as the room, and at 125% a quarter brighter, so that it reaches the day-time brightness once the room is 80% of the way to bright. The screen stays between the night-time and day-time brightness settings either way.",
             [nameof(AmbientLightLevelLabel)] = "Light in the room:",
             [nameof(AmbientLightLevelTooltip)] = """
-                The latest reading, from 0% in a room as dark as the dark reference to 100% in one as bright as the bright reference, which is also the brightness the screen goes to, held between the night-time and day-time brightness settings.
+                The latest reading, from 0% in a room as dark as the dark reference to 100% in one as bright as the bright reference. The screen's brightness is this times the screen brightness above, held between the night-time and day-time brightness settings.
 
                 While this tab is open, the camera is read every couple of seconds. Make the room as dark as it gets and press DARK ROOM, then as bright as it gets and press BRIGHT ROOM.
                 """,
