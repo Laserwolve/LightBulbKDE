@@ -152,43 +152,63 @@
         Size="26"
       />
 
-      <!--  Configuration offset  -->
+      <!--  Ambient light and configuration offset  -->
       <StackPanel
-        x:Name="ConfigurationOffsetStackPanel"
         Margin="0,50,0,0"
         HorizontalAlignment="Center"
         VerticalAlignment="Top"
-        Background="Transparent"
-        Cursor="Hand"
-        IsVisible="{Binding IsOffsetEnabled}"
         Orientation="Horizontal"
-        PointerReleased="ConfigurationOffsetStackPanel_OnPointerReleased"
-        Spacing="4"
+        Spacing="12"
       >
-        <ToolTip.Tip>
-          <TextBlock>
-            <Run Text="{Binding LocalizationManager.OffsetTooltipHeader}" />
-            <LineBreak />
-            <Run Text=" " />
-            <Run Text="{Binding LocalizationManager.TemperatureOffsetLabel}" />
-            <Run
-              FontWeight="SemiBold"
-              Text="{Binding TemperatureOffset, StringFormat={}{0:F0} K, Mode=OneWay}"
-            />
-            <LineBreak />
-            <Run Text=" " />
-            <Run Text="{Binding LocalizationManager.BrightnessOffsetLabel}" />
-            <Run
-              FontWeight="SemiBold"
-              Text="{Binding BrightnessOffset, StringFormat={}{0:P0}, Mode=OneWay}"
-            />
-            <LineBreak />
-            <LineBreak />
-            <Run FontWeight="SemiBold" Text="{Binding LocalizationManager.ClickToResetLabel}" />
-          </TextBlock>
-        </ToolTip.Tip>
-        <materialIcons:MaterialIcon Width="16" Height="16" Kind="SwapVertical" />
-        <TextBlock FontSize="15" Text="{Binding LocalizationManager.OffsetLabel}" />
+        <!--  Ambient light  -->
+        <StackPanel
+          IsVisible="{Binding IsAmbientLightActive}"
+          Orientation="Horizontal"
+          Spacing="4"
+          ToolTip.Tip="{Binding AmbientLightTooltip}"
+        >
+          <materialIcons:MaterialIcon Width="16" Height="16" Kind="BrightnessAuto" />
+          <TextBlock
+            FontSize="15"
+            Text="{Binding AmbientLightLevel, Converter={x:Static converters:FractionToPercentageStringConverter.Instance}, Mode=OneWay}"
+          />
+        </StackPanel>
+
+        <!--  Configuration offset  -->
+        <StackPanel
+          x:Name="ConfigurationOffsetStackPanel"
+          Background="Transparent"
+          Cursor="Hand"
+          IsVisible="{Binding IsOffsetEnabled}"
+          Orientation="Horizontal"
+          PointerReleased="ConfigurationOffsetStackPanel_OnPointerReleased"
+          Spacing="4"
+        >
+          <ToolTip.Tip>
+            <TextBlock>
+              <Run Text="{Binding LocalizationManager.OffsetTooltipHeader}" />
+              <LineBreak />
+              <Run Text=" " />
+              <Run Text="{Binding LocalizationManager.TemperatureOffsetLabel}" />
+              <Run
+                FontWeight="SemiBold"
+                Text="{Binding TemperatureOffset, StringFormat={}{0:F0} K, Mode=OneWay}"
+              />
+              <LineBreak />
+              <Run Text=" " />
+              <Run Text="{Binding LocalizationManager.BrightnessOffsetLabel}" />
+              <Run
+                FontWeight="SemiBold"
+                Text="{Binding BrightnessOffset, StringFormat={}{0:P0}, Mode=OneWay}"
+              />
+              <LineBreak />
+              <LineBreak />
+              <Run FontWeight="SemiBold" Text="{Binding LocalizationManager.ClickToResetLabel}" />
+            </TextBlock>
+          </ToolTip.Tip>
+          <materialIcons:MaterialIcon Width="16" Height="16" Kind="SwapVertical" />
+          <TextBlock FontSize="15" Text="{Binding LocalizationManager.OffsetLabel}" />
+        </StackPanel>
       </StackPanel>
 
       <!--  Current temperature and brightness  -->

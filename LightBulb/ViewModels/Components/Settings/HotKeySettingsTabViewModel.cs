@@ -7,7 +7,7 @@ namespace LightBulb.ViewModels.Components.Settings;
 public class HotKeySettingsTabViewModel(
     SettingsService settingsService,
     LocalizationManager localizationManager
-) : SettingsTabViewModelBase(settingsService, localizationManager, 4)
+) : SettingsTabViewModelBase(settingsService, localizationManager, 5)
 {
     public override string DisplayName => LocalizationManager.HotkeysTabName;
 

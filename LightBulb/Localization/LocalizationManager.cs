@@ -95,6 +95,7 @@ public partial class LocalizationManager
     public string BrightnessOffsetLabel => Get();
     public string ClickToResetLabel => Get();
     public string OffsetLabel => Get();
+    public string AmbientLightIndicatorTooltip => Get();
 
     // ---- Main window ----
 
@@ -120,6 +121,7 @@ public partial class LocalizationManager
     public string AdvancedTabName => Get();
     public string AppWhitelistTabName => Get();
     public string HotkeysTabName => Get();
+    public string AmbientLightTabName => Get();
 
     // ---- Advanced settings tab ----
 
@@ -144,6 +146,30 @@ public partial class LocalizationManager
     public string GammaSmoothingTooltip => Get();
     public string GammaPollingLabel => Get();
     public string GammaPollingTooltip => Get();
+
+    // ---- Ambient light settings tab ----
+
+    public string AmbientLightLabel => Get();
+    public string AmbientLightTooltip => Get();
+    public string AmbientLightCameraLabel => Get();
+    public string AmbientLightCameraTooltip => Get();
+    public string AmbientLightContinuousLabel => Get();
+    public string AmbientLightContinuousTooltip => Get();
+    public string AmbientLightIntervalLabel => Get();
+    public string AmbientLightIntervalTooltip => Get();
+    public string AmbientLightLevelLabel => Get();
+    public string AmbientLightLevelTooltip => Get();
+    public string AmbientLightDarkButton => Get();
+    public string AmbientLightDarkTooltip => Get();
+    public string AmbientLightBrightButton => Get();
+    public string AmbientLightBrightTooltip => Get();
+    public string AmbientLightIdleText => Get();
+    public string AmbientLightNoCameraText => Get();
+    public string AmbientLightCameraInUseText => Get();
+    public string AmbientLightCameraLentText => Get();
+    public string AmbientLightCameraSettlingText => Get();
+    public string AmbientLightCalibratingText => Get();
+    public string AmbientLightFailedText => Get();
 
     // ---- General settings tab ----
 
@@ -216,6 +242,8 @@ public partial class LocalizationManager
     public string TrayDisableFor15MinutesMenuItem => Get();
     public string TrayDisableFor5MinutesMenuItem => Get();
     public string TrayDisableFor1MinuteMenuItem => Get();
+    public string TrayLendCameraMenuItem => Get();
+    public string TrayTakeCameraBackMenuItem => Get();
     public string TrayExitMenuItem => Get();
 
     public string TrayTooltipDisabled => Get();

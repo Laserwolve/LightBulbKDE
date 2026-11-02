@@ -121,6 +121,37 @@ public partial class SettingsService()
     [ObservableProperty]
     public partial bool IsGammaPollingEnabled { get; set; }
 
+    // Ambient light
+
+    [ObservableProperty]
+    public partial bool IsAmbientLightEnabled { get; set; }
+
+    // The camera's name, or null for the first camera found
+    [ObservableProperty]
+    public partial string? AmbientLightCamera { get; set; }
+
+    // Whether the camera streams all the time, rather than being read every interval
+    [ObservableProperty]
+    public partial bool IsAmbientLightContinuous { get; set; }
+
+    [ObservableProperty]
+    public partial TimeSpan AmbientLightInterval { get; set; } = TimeSpan.FromSeconds(15);
+
+    // The light, in the camera's own stops, of the darkest room, where the night-time brightness
+    // applies, and of the brightest, where the day-time brightness does. The defaults suit a
+    // webcam at its default gain for a room lit by little more than its monitors and one lit by
+    // daylight, and the settings offer to take the room as it is for either.
+    [ObservableProperty]
+    public partial double AmbientLightDarkStops { get; set; } = -2.5;
+
+    [ObservableProperty]
+    public partial double AmbientLightBrightStops { get; set; } = 5;
+
+    // How much the screen itself lights the room, as the camera sees it, per unit of the screen's
+    // dimming, measured when the dark reference is taken and left out of every reading
+    [ObservableProperty]
+    public partial double AmbientLightGlow { get; set; }
+
     // Application whitelist
 
     [ObservableProperty]

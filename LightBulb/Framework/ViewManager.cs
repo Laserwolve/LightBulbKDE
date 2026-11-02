@@ -21,6 +21,7 @@ public partial class ViewManager
             MessageBoxViewModel => new MessageBoxView(),
             SettingsViewModel => new SettingsView(),
             AdvancedSettingsTabViewModel => new AdvancedSettingsTabView(),
+            AmbientLightSettingsTabViewModel => new AmbientLightSettingsTabView(),
             ApplicationWhitelistSettingsTabViewModel => new ApplicationWhitelistSettingsTabView(),
             GeneralSettingsTabViewModel => new GeneralSettingsTabView(),
             HotKeySettingsTabViewModel => new HotKeySettingsTabView(),

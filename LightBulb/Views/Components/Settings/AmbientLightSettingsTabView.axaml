@@ -1,0 +1,163 @@
+<UserControl
+  x:Class="LightBulb.Views.Components.Settings.AmbientLightSettingsTabView"
+  xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:converters="clr-namespace:LightBulb.Converters"
+  xmlns:settings="clr-namespace:LightBulb.ViewModels.Components.Settings"
+  x:DataType="settings:AmbientLightSettingsTabViewModel"
+  Loaded="UserControl_OnLoaded"
+  Unloaded="UserControl_OnUnloaded"
+>
+  <StackPanel Margin="16" Orientation="Vertical" Spacing="16">
+    <!--  Follow the room's light  -->
+    <Grid ColumnDefinitions="*,Auto">
+      <ToolTip.Tip>
+        <TextBlock
+          MaxWidth="350"
+          Text="{Binding LocalizationManager.AmbientLightTooltip}"
+          TextWrapping="Wrap"
+        />
+      </ToolTip.Tip>
+      <TextBlock
+        Grid.Column="0"
+        VerticalAlignment="Center"
+        Text="{Binding LocalizationManager.AmbientLightLabel}"
+        TextTrimming="CharacterEllipsis"
+      />
+      <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsAmbientLightEnabled}" />
+    </Grid>
+
+    <!--  Camera  -->
+    <Grid
+      ColumnDefinitions="*,Auto"
+      ToolTip.Tip="{Binding LocalizationManager.AmbientLightCameraTooltip}"
+    >
+      <TextBlock
+        Grid.Column="0"
+        VerticalAlignment="Center"
+        Text="{Binding LocalizationManager.AmbientLightCameraLabel}"
+        TextTrimming="CharacterEllipsis"
+      />
+      <ComboBox
+        Grid.Column="1"
+        MaxWidth="180"
+        ItemsSource="{Binding AvailableCameras}"
+        SelectedItem="{Binding Camera}"
+      />
+    </Grid>
+
+    <!--  Keep the camera on  -->
+    <Grid ColumnDefinitions="*,Auto">
+      <ToolTip.Tip>
+        <TextBlock
+          MaxWidth="350"
+          Text="{Binding LocalizationManager.AmbientLightContinuousTooltip}"
+          TextWrapping="Wrap"
+        />
+      </ToolTip.Tip>
+      <TextBlock
+        Grid.Column="0"
+        VerticalAlignment="Center"
+        Text="{Binding LocalizationManager.AmbientLightContinuousLabel}"
+        TextTrimming="CharacterEllipsis"
+      />
+      <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsContinuous}" />
+    </Grid>
+
+    <!--  Interval  -->
+    <StackPanel IsVisible="{Binding !IsContinuous}" Orientation="Vertical" Spacing="12">
+      <Grid
+        ColumnDefinitions="*,Auto"
+        ToolTip.Tip="{Binding LocalizationManager.AmbientLightIntervalTooltip}"
+      >
+        <TextBlock
+          Grid.Column="0"
+          VerticalAlignment="Center"
+          Text="{Binding LocalizationManager.AmbientLightIntervalLabel}"
+          TextTrimming="CharacterEllipsis"
+        />
+        <TextBox
+          Grid.Column="1"
+          MinWidth="48"
+          VerticalAlignment="Center"
+          Text="{Binding Interval, Converter={x:Static converters:TimeSpanToDurationStringConverter.Instance}, UpdateSourceTrigger=LostFocus}"
+          Theme="{DynamicResource CompactTextBox}"
+        />
+      </Grid>
+      <Slider
+        IsSnapToTickEnabled="True"
+        LargeChange="10"
+        Maximum="120"
+        Minimum="2"
+        SmallChange="1"
+        TickFrequency="1"
+        Value="{Binding Interval, Converter={x:Static converters:TimeSpanToSecondsDoubleConverter.Instance}}"
+      />
+    </StackPanel>
+
+    <!--  Light in the room  -->
+    <StackPanel Orientation="Vertical" Spacing="12">
+      <Grid ColumnDefinitions="*,Auto">
+        <ToolTip.Tip>
+          <TextBlock
+            MaxWidth="350"
+            Text="{Binding LocalizationManager.AmbientLightLevelTooltip}"
+            TextWrapping="Wrap"
+          />
+        </ToolTip.Tip>
+        <TextBlock
+          Grid.Column="0"
+          VerticalAlignment="Center"
+          Text="{Binding LocalizationManager.AmbientLightLevelLabel}"
+          TextTrimming="CharacterEllipsis"
+        />
+        <TextBlock
+          Grid.Column="1"
+          VerticalAlignment="Center"
+          IsVisible="{Binding HasReading}"
+          Text="{Binding Level, Converter={x:Static converters:FractionToPercentageStringConverter.Instance}, Mode=OneWay}"
+        />
+      </Grid>
+      <ProgressBar
+        Maximum="1"
+        Minimum="0"
+        Value="{Binding Level, Mode=OneWay, TargetNullValue=0}"
+      />
+      <TextBlock
+        HorizontalAlignment="Center"
+        FontSize="13"
+        IsVisible="{Binding IsStatusShown}"
+        Text="{Binding StatusText}"
+        TextWrapping="Wrap"
+      />
+      <UniformGrid Columns="2">
+        <Button
+          Margin="0,0,4,0"
+          HorizontalContentAlignment="Stretch"
+          Command="{Binding SetDarkReferenceCommand}"
+          Theme="{DynamicResource MaterialFlatButton}"
+          ToolTip.Tip="{Binding LocalizationManager.AmbientLightDarkTooltip}"
+        >
+          <TextBlock
+            Text="{Binding LocalizationManager.AmbientLightDarkButton}"
+            TextAlignment="Center"
+            TextTrimming="CharacterEllipsis"
+          />
+        </Button>
+        <Button
+          Margin="4,0,0,0"
+          HorizontalContentAlignment="Stretch"
+          Command="{Binding SetBrightReferenceCommand}"
+          Theme="{DynamicResource MaterialFlatButton}"
+          ToolTip.Tip="{Binding LocalizationManager.AmbientLightBrightTooltip}"
+        >
+          <TextBlock
+            Text="{Binding LocalizationManager.AmbientLightBrightButton}"
+            TextAlignment="Center"
+            TextTrimming="CharacterEllipsis"
+          />
+        </Button>
+      </UniformGrid>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

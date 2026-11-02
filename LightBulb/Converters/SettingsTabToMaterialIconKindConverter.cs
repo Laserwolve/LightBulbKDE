@@ -16,6 +16,7 @@ public class SettingsTabToMaterialIconKindConverter : IValueConverter
             GeneralSettingsTabViewModel => MaterialIconKind.Settings,
             LocationSettingsTabViewModel => MaterialIconKind.Globe,
             AdvancedSettingsTabViewModel => MaterialIconKind.CheckboxesMarked,
+            AmbientLightSettingsTabViewModel => MaterialIconKind.BrightnessAuto,
             ApplicationWhitelistSettingsTabViewModel => MaterialIconKind.Apps,
             HotKeySettingsTabViewModel => MaterialIconKind.Keyboard,
             // Shouldn't happen

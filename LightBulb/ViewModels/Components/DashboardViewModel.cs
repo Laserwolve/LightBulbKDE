@@ -22,6 +22,7 @@ public partial class DashboardViewModel : ViewModelBase
 {
     private readonly SettingsService _settingsService;
     private readonly GammaService _gammaService;
+    private readonly AmbientLightService _ambientLightService;
     private readonly HotKeyService _hotKeyService;
     private readonly ExternalApplicationService _externalApplicationService;
 
@@ -39,6 +40,7 @@ public partial class DashboardViewModel : ViewModelBase
         SettingsService settingsService,
         LocalizationManager localizationManager,
         GammaService gammaService,
+        AmbientLightService ambientLightService,
         HotKeyService hotKeyService,
         ExternalApplicationService externalApplicationService
     )
@@ -46,6 +48,7 @@ public partial class DashboardViewModel : ViewModelBase
         _settingsService = settingsService;
         LocalizationManager = localizationManager;
         _gammaService = gammaService;
+        _ambientLightService = ambientLightService;
         _hotKeyService = hotKeyService;
         _externalApplicationService = externalApplicationService;
 
@@ -82,6 +85,8 @@ public partial class DashboardViewModel : ViewModelBase
                 {
                     OnPropertyChanged(nameof(SunsetTransitionTooltip));
                     OnPropertyChanged(nameof(SunriseTransitionTooltip));
+                    OnPropertyChanged(nameof(AmbientLightTooltip));
+                    OnPropertyChanged(nameof(RoomConfiguration));
                     OnPropertyChanged(nameof(StatusText));
                 }
             ),
@@ -97,6 +102,46 @@ public partial class DashboardViewModel : ViewModelBase
                     o => o.ResetConfigurationOffsetHotKey,
                 ],
                 RegisterHotKeys
+            ),
+            // Read the room's light only while the brightness is following it
+            this.WatchProperties(
+                [o => o.IsEnabled, o => o.IsPaused, o => o.IsCyclePreviewEnabled],
+                UpdateAmbientLightMetering
+            ),
+            settingsService.WatchProperty(
+                o => o.IsAmbientLightEnabled,
+                _ => UpdateAmbientLightMetering()
+            ),
+            // The tray offers to lend the camera while it is being kept on
+            ambientLightService.WatchProperty(
+                o => o.IsCameraLent,
+                _ =>
+                {
+                    OnPropertyChanged(nameof(IsCameraLendable));
+                    OnPropertyChanged(nameof(IsCameraLent));
+                }
+            ),
+            settingsService.WatchProperties(
+                [o => o.IsAmbientLightEnabled, o => o.IsAmbientLightContinuous],
+                () => OnPropertyChanged(nameof(IsCameraLendable))
+            ),
+            // The screen is brightened for a moment while the room is read for its glow
+            ambientLightService.WatchProperty(
+                o => o.ForcedBrightness,
+                _ => OnPropertyChanged(nameof(TargetConfiguration))
+            ),
+            // Follow each reading of the room's light
+            ambientLightService.WatchProperty(
+                o => o.Stops,
+                _ =>
+                {
+                    OnPropertyChanged(nameof(AmbientLightLevel));
+                    OnPropertyChanged(nameof(IsAmbientLightActive));
+                    OnPropertyChanged(nameof(AmbientLightTooltip));
+                    OnPropertyChanged(nameof(RoomConfiguration));
+                    OnPropertyChanged(nameof(TargetConfiguration));
+                    OnPropertyChanged(nameof(CycleState));
+                }
             )
         );
 
@@ -119,16 +164,28 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsActive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(AmbientLightLevel))]
+    [NotifyPropertyChangedFor(nameof(IsAmbientLightActive))]
+    [NotifyPropertyChangedFor(nameof(IsFollowingRoom))]
+    [NotifyPropertyChangedFor(nameof(IsCameraLendable))]
     public partial bool IsEnabled { get; set; } = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsActive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(AmbientLightLevel))]
+    [NotifyPropertyChangedFor(nameof(IsAmbientLightActive))]
+    [NotifyPropertyChangedFor(nameof(IsFollowingRoom))]
+    [NotifyPropertyChangedFor(nameof(IsCameraLendable))]
     public partial bool IsPaused { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsActive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
+    [NotifyPropertyChangedFor(nameof(AmbientLightLevel))]
+    [NotifyPropertyChangedFor(nameof(IsAmbientLightActive))]
+    [NotifyPropertyChangedFor(nameof(IsFollowingRoom))]
+    [NotifyPropertyChangedFor(nameof(IsCameraLendable))]
     public partial bool IsCyclePreviewEnabled { get; set; }
 
     public bool IsActive => IsEnabled && !IsPaused || IsCyclePreviewEnabled;
@@ -141,12 +198,16 @@ public partial class DashboardViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(SunsetEnd))]
     [NotifyPropertyChangedFor(nameof(SunriseTransitionTooltip))]
     [NotifyPropertyChangedFor(nameof(SunsetTransitionTooltip))]
+    [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
+    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(CycleState))]
     public partial DateTimeOffset Instant { get; set; } = DateTimeOffset.Now;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOffsetEnabled))]
+    [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
+    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedDayConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedNightConfiguration))]
@@ -155,6 +216,8 @@ public partial class DashboardViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOffsetEnabled))]
+    [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
+    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedDayConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedNightConfiguration))]
@@ -215,7 +278,8 @@ public partial class DashboardViewModel : ViewModelBase
 
     public bool IsOffsetEnabled => Math.Abs(TemperatureOffset) + Math.Abs(BrightnessOffset) >= 0.01;
 
-    public ColorConfiguration TargetConfiguration =>
+    // What the day and night cycle alone asks for at this instant
+    public ColorConfiguration CycleConfiguration =>
         IsActive
             ? Cycle
                 .InterpolateConfiguration(
@@ -236,6 +300,84 @@ public partial class DashboardViewModel : ViewModelBase
         : _settingsService.IsDefaultToDayConfigurationEnabled ? _settingsService.DayConfiguration
         : ColorConfiguration.Default;
 
+    // Whether the screen follows the room rather than the clock, which it does whenever the room
+    // is being read. The cycle preview shows the clock's own cycle, so the room stays out of it.
+    public bool IsFollowingRoom =>
+        IsEnabled && !IsPaused && !IsCyclePreviewEnabled && _settingsService.IsAmbientLightEnabled;
+
+    // The light in the room, from 0 in a room as dark as the dark reference to 1 in one as bright
+    // as the bright reference, while the screen follows the room and a reading has come in
+    public double? AmbientLightLevel =>
+        IsFollowingRoom && _ambientLightService.Stops is { } stops
+            ? AmbientLight.GetLevel(
+                stops,
+                _settingsService.AmbientLightDarkStops,
+                _settingsService.AmbientLightBrightStops
+            )
+            : null;
+
+    public bool IsAmbientLightActive => AmbientLightLevel is not null;
+
+    // Whether the camera is being read for the room's light, so that it could be lent out
+    public bool IsCameraLendable => IsFollowingRoom && !_ambientLightService.IsCameraLent;
+
+    public bool IsCameraLent => _ambientLightService.IsCameraLent;
+
+    public string AmbientLightTooltip =>
+        string.Format(
+            LocalizationManager.AmbientLightIndicatorTooltip,
+            (AmbientLightLevel ?? 0).ToString("P0", CultureInfo.CurrentCulture)
+        );
+
+    // What the room asks for: the night-time settings in a room as dark as the dark reference, the
+    // day-time settings in one as bright as the bright reference, and in between for anything
+    // between, with the offset on top. Until the first reading comes in, the room counts as bright.
+    public ColorConfiguration RoomConfiguration =>
+        AmbientLight
+            .GetConfiguration(
+                AmbientLightLevel ?? 1,
+                _settingsService.NightConfiguration,
+                _settingsService.DayConfiguration
+            )
+            .WithOffset(TemperatureOffset, BrightnessOffset)
+            .Clamp(
+                _settingsService.MinimumTemperature,
+                _settingsService.MaximumTemperature,
+                _settingsService.MinimumBrightness,
+                _settingsService.MaximumBrightness
+            );
+
+    public ColorConfiguration TargetConfiguration
+    {
+        get
+        {
+            if (!IsActive)
+            {
+                return _settingsService.IsDefaultToDayConfigurationEnabled
+                    ? _settingsService.DayConfiguration
+                    : ColorConfiguration.Default;
+            }
+
+            if (!IsFollowingRoom)
+                return CycleConfiguration;
+
+            // While the room is read for the screen's own glow, the screen holds the brightness asked
+            if (_ambientLightService.ForcedBrightness is { } forcedBrightness)
+            {
+                return RoomConfiguration with
+                {
+                    Brightness = Math.Clamp(
+                        forcedBrightness,
+                        _settingsService.MinimumBrightness,
+                        _settingsService.MaximumBrightness
+                    ),
+                };
+            }
+
+            return RoomConfiguration;
+        }
+    }
+
     public ColorConfiguration AdjustedDayConfiguration =>
         _settingsService.DayConfiguration.WithOffset(TemperatureOffset, BrightnessOffset);
 
@@ -248,8 +390,9 @@ public partial class DashboardViewModel : ViewModelBase
             _ when CurrentConfiguration != TargetConfiguration => CycleState.Transition,
             _ when !IsEnabled => CycleState.Disabled,
             _ when IsPaused => CycleState.Paused,
-            _ when CurrentConfiguration == AdjustedDayConfiguration => CycleState.Day,
-            _ when CurrentConfiguration == AdjustedNightConfiguration => CycleState.Night,
+            // A room between dark and bright is a transition, like a sunset
+            _ when TargetConfiguration == AdjustedDayConfiguration => CycleState.Day,
+            _ when TargetConfiguration == AdjustedNightConfiguration => CycleState.Night,
             _ => CycleState.Transition,
         };
 
@@ -349,6 +492,14 @@ public partial class DashboardViewModel : ViewModelBase
         }
     }
 
+    // The camera is read only while the brightness is following the room
+    private void UpdateAmbientLightMetering() =>
+        _ambientLightService.IsMeteringRequested =
+            IsEnabled
+            && !IsPaused
+            && !IsCyclePreviewEnabled
+            && _settingsService.IsAmbientLightEnabled;
+
     private void UpdateInstant()
     {
         // If in cycle preview mode, advance quickly until the full cycle has been reached
@@ -426,6 +577,9 @@ public partial class DashboardViewModel : ViewModelBase
         }
 
         _gammaService.SetGamma(CurrentConfiguration);
+
+        // The room is read with the screen's own glow in it, which this lets the reading allow for
+        _ambientLightService.ScreenBrightness = CurrentConfiguration.Brightness;
     }
 
     private void UpdateIsPaused()
@@ -458,6 +612,8 @@ public partial class DashboardViewModel : ViewModelBase
         _updateConfigurationTimer.Start();
         _updateIsPausedTimer.Start();
 
+        UpdateAmbientLightMetering();
+
         // Hack: feign property changes to refresh the tray icon
         OnAllPropertiesChanged();
 
@@ -485,6 +641,12 @@ public partial class DashboardViewModel : ViewModelBase
 
     [RelayCommand]
     private void Toggle() => IsEnabled = !IsEnabled;
+
+    [RelayCommand]
+    private void LendCamera() => _ambientLightService.LendCamera();
+
+    [RelayCommand]
+    private void TakeCameraBack() => _ambientLightService.TakeCameraBack();
 
     [RelayCommand]
     private void ResetConfigurationOffset()

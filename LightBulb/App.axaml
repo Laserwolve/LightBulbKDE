@@ -282,6 +282,16 @@
                 </NativeMenuItem>
               </NativeMenu>
             </NativeMenuItem>
+            <NativeMenuItem
+              Command="{Binding Dashboard.LendCameraCommand}"
+              Header="{Binding LocalizationManager.TrayLendCameraMenuItem}"
+              IsVisible="{Binding Dashboard.IsCameraLendable}"
+            />
+            <NativeMenuItem
+              Command="{Binding Dashboard.TakeCameraBackCommand}"
+              Header="{Binding LocalizationManager.TrayTakeCameraBackMenuItem}"
+              IsVisible="{Binding Dashboard.IsCameraLent}"
+            />
             <NativeMenuItemSeparator />
             <NativeMenuItem
               Click="TrayExitMenuItem_OnClick"

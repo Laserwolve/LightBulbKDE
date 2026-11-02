@@ -69,7 +69,10 @@ Categories=Utility;
 StartupWMClass=LightBulbKDE
 EOF
 
+# A camera the old copy was streaming from can stop answering if a new stream is asked of it
+# within some seconds of the old one stopping, so the new copy is held back
 if $was_running; then
+    sleep 20
     setsid -f "$dest/LightBulbKDE" --start-hidden >/dev/null 2>&1
 fi
 

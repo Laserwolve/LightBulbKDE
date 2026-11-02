@@ -40,6 +40,7 @@ public partial class App : Application, IDisposable
         services.AddSingleton<ViewModelManager>();
 
         // Services
+        services.AddSingleton<AmbientLightService>();
         services.AddSingleton<ExternalApplicationService>();
         services.AddSingleton<LocalizationManager>();
         services.AddSingleton<GammaService>();
@@ -55,6 +56,10 @@ public partial class App : Application, IDisposable
         services.AddTransient<SettingsTabViewModelBase, AdvancedSettingsTabViewModel>();
         services.AddTransient<SettingsTabViewModelBase, GeneralSettingsTabViewModel>();
         services.AddTransient<SettingsTabViewModelBase, LocationSettingsTabViewModel>();
+
+        // Reading the room's light through the webcam goes through Video4Linux
+        if (OperatingSystem.IsLinux())
+            services.AddTransient<SettingsTabViewModelBase, AmbientLightSettingsTabViewModel>();
 
         // Application whitelisting and global hotkeys go through the Windows API
         if (OperatingSystem.IsWindows())

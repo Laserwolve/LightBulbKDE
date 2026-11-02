@@ -20,6 +20,8 @@ public partial class LocalizationManager
             [nameof(BrightnessOffsetLabel)] = "Brightness offset:",
             [nameof(ClickToResetLabel)] = "Click to reset",
             [nameof(OffsetLabel)] = "offset",
+            [nameof(AmbientLightIndicatorTooltip)] =
+                "The screen follows the light in the room, which is {0} of the way from a dark room to a bright one",
             // Main window
             [nameof(ToggleLightBulbTooltip)] = "Toggle LightBulb on/off",
             [nameof(HideToTrayTooltip)] = "Hide LightBulb to the system tray",
@@ -39,6 +41,7 @@ public partial class LocalizationManager
             [nameof(AdvancedTabName)] = "Advanced",
             [nameof(AppWhitelistTabName)] = "Application whitelist",
             [nameof(HotkeysTabName)] = "Hotkeys",
+            [nameof(AmbientLightTabName)] = "Ambient light",
             // Advanced settings tab
             [nameof(ThemeLabel)] = "Theme",
             [nameof(ThemeTooltip)] = "Preferred user interface theme",
@@ -63,6 +66,47 @@ public partial class LocalizationManager
             [nameof(GammaPollingLabel)] = "Gamma polling",
             [nameof(GammaPollingTooltip)] =
                 "Force-refresh monitor gamma at regular intervals to prevent other programs from overriding it",
+            // Ambient light settings tab
+            [nameof(AmbientLightLabel)] = "Follow the room's light",
+            [nameof(AmbientLightTooltip)] = """
+                Read the light in the room through the webcam, as a phone reads its light sensor, and set the color temperature and brightness from it instead of from the time of day: the day-time settings in a bright room, the night-time settings in a dark one, and in between for anything between. Sunrise and sunset are not used while this is on.
+
+                The camera's activity light is on whenever it is being read, and a camera another program has open is left alone.
+                """,
+            [nameof(AmbientLightCameraLabel)] = "Camera:",
+            [nameof(AmbientLightCameraTooltip)] = "The webcam to read the room's light from",
+            [nameof(AmbientLightContinuousLabel)] = "Keep the camera on",
+            [nameof(AmbientLightContinuousTooltip)] = """
+                Stream from the camera all the time, at a few frames a second, instead of reading it every so often. The screen then follows the room within a second or two, for next to no load, and the camera's activity light stays on.
+
+                The camera streams to LightBulb alone, so other programs find it busy. Lend it to them from the tray menu: the stream stops, and starts again a moment after they have let the camera go.
+
+                Some cameras, the Logitech C920 among them, stop answering when a stream is asked of them within seconds of a long one stopping, which a restart of LightBulb does, and then need unplugging for half a minute. Reading every few seconds instead has never done that.
+                """,
+            [nameof(AmbientLightIntervalLabel)] = "Read every:",
+            [nameof(AmbientLightIntervalTooltip)] =
+                "How often the room's light is read while the camera is not kept on. Every reading turns the camera on for a moment, and the screen follows a filtered reading, quickly when the room brightens and slowly when it darkens.",
+            [nameof(AmbientLightLevelLabel)] = "Light in the room:",
+            [nameof(AmbientLightLevelTooltip)] = """
+                The latest reading, from 0% in a room as dark as the dark reference to 100% in one as bright as the bright reference.
+
+                While this tab is open, the camera is read every couple of seconds. Make the room as dark as it gets and press DARK ROOM, then as bright as it gets and press BRIGHT ROOM.
+                """,
+            [nameof(AmbientLightDarkButton)] = "DARK ROOM",
+            [nameof(AmbientLightDarkTooltip)] = """
+                Take the light in the room right now as the darkest it gets, where the night-time brightness applies.
+
+                The screen brightens for a couple of seconds meanwhile: the room is read with the screen as it is and again with it brightened, and the difference is how much the screen itself lights the room, which is then left out of every reading. Press this with the lights off and the room as you keep it at night.
+                """,
+            [nameof(AmbientLightBrightButton)] = "BRIGHT ROOM",
+            [nameof(AmbientLightBrightTooltip)] =
+                "Take the light in the room right now as the brightest it gets, where the day-time brightness applies",
+            [nameof(AmbientLightIdleText)] = "Waiting for a reading...",
+            [nameof(AmbientLightNoCameraText)] = "No camera was found",
+            [nameof(AmbientLightCameraInUseText)] = "The camera is in use by another program",
+            [nameof(AmbientLightCameraLentText)] =
+                "The camera is lent out, until another program has used it",
+            [nameof(AmbientLightFailedText)] = "The camera could not be read",
             // General settings tab
             [nameof(DayTemperatureLabel)] = "Day-time color temperature:",
             [nameof(DayTemperatureTooltip)] = "Color temperature during the day",
@@ -154,6 +198,8 @@ public partial class LocalizationManager
             [nameof(TrayDisableFor15MinutesMenuItem)] = "For 15 minutes",
             [nameof(TrayDisableFor5MinutesMenuItem)] = "For 5 minutes",
             [nameof(TrayDisableFor1MinuteMenuItem)] = "For 1 minute",
+            [nameof(TrayLendCameraMenuItem)] = "Lend the camera",
+            [nameof(TrayTakeCameraBackMenuItem)] = "Take the camera back",
             [nameof(TrayExitMenuItem)] = "Exit",
             [nameof(TrayTooltipDisabled)] = "Disabled",
             // Dialog messages
