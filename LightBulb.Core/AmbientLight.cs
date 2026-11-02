@@ -87,25 +87,17 @@ public static class AmbientLight
         return Math.Clamp((stops - darkStops) / (brightStops - darkStops), 0, 1);
     }
 
-    // The screen's settings for a level of light in the room: the brightness is the level itself,
-    // so that the screen is as bright as the room, held between the two brightness settings, while
-    // the temperature runs from the dark room's to the bright room's
-    public static ColorConfiguration GetConfiguration(
+    // The screen's brightness for a level of light in the room: the level itself, so that the
+    // screen is as bright as the room, held between the dark room's brightness and the bright
+    // room's
+    public static double GetBrightness(
         double level,
-        ColorConfiguration darkConfiguration,
-        ColorConfiguration brightConfiguration
-    )
-    {
-        var fraction = Math.Clamp(level, 0, 1);
-
-        return new ColorConfiguration(
-            darkConfiguration.Temperature
-                + (brightConfiguration.Temperature - darkConfiguration.Temperature) * fraction,
-            Math.Clamp(
-                fraction,
-                Math.Min(darkConfiguration.Brightness, brightConfiguration.Brightness),
-                Math.Max(darkConfiguration.Brightness, brightConfiguration.Brightness)
-            )
+        double darkBrightness,
+        double brightBrightness
+    ) =>
+        Math.Clamp(
+            level,
+            Math.Min(darkBrightness, brightBrightness),
+            Math.Max(darkBrightness, brightBrightness)
         );
-    }
 }

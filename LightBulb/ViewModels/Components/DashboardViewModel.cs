@@ -86,7 +86,6 @@ public partial class DashboardViewModel : ViewModelBase
                     OnPropertyChanged(nameof(SunsetTransitionTooltip));
                     OnPropertyChanged(nameof(SunriseTransitionTooltip));
                     OnPropertyChanged(nameof(AmbientLightTooltip));
-                    OnPropertyChanged(nameof(RoomConfiguration));
                     OnPropertyChanged(nameof(StatusText));
                 }
             ),
@@ -104,10 +103,7 @@ public partial class DashboardViewModel : ViewModelBase
                 RegisterHotKeys
             ),
             // Read the room's light only while the brightness is following it
-            this.WatchProperties(
-                [o => o.IsEnabled, o => o.IsPaused, o => o.IsCyclePreviewEnabled],
-                UpdateAmbientLightMetering
-            ),
+            this.WatchProperties([o => o.IsEnabled, o => o.IsPaused], UpdateAmbientLightMetering),
             settingsService.WatchProperty(
                 o => o.IsAmbientLightEnabled,
                 _ => UpdateAmbientLightMetering()
@@ -138,7 +134,7 @@ public partial class DashboardViewModel : ViewModelBase
                     OnPropertyChanged(nameof(AmbientLightLevel));
                     OnPropertyChanged(nameof(IsAmbientLightActive));
                     OnPropertyChanged(nameof(AmbientLightTooltip));
-                    OnPropertyChanged(nameof(RoomConfiguration));
+                    OnPropertyChanged(nameof(RoomBrightness));
                     OnPropertyChanged(nameof(TargetConfiguration));
                     OnPropertyChanged(nameof(CycleState));
                 }
@@ -182,10 +178,6 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsActive))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
-    [NotifyPropertyChangedFor(nameof(AmbientLightLevel))]
-    [NotifyPropertyChangedFor(nameof(IsAmbientLightActive))]
-    [NotifyPropertyChangedFor(nameof(IsFollowingRoom))]
-    [NotifyPropertyChangedFor(nameof(IsCameraLendable))]
     public partial bool IsCyclePreviewEnabled { get; set; }
 
     public bool IsActive => IsEnabled && !IsPaused || IsCyclePreviewEnabled;
@@ -199,7 +191,6 @@ public partial class DashboardViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(SunriseTransitionTooltip))]
     [NotifyPropertyChangedFor(nameof(SunsetTransitionTooltip))]
     [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
-    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(CycleState))]
     public partial DateTimeOffset Instant { get; set; } = DateTimeOffset.Now;
@@ -207,7 +198,6 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOffsetEnabled))]
     [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
-    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedDayConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedNightConfiguration))]
@@ -217,7 +207,7 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOffsetEnabled))]
     [NotifyPropertyChangedFor(nameof(CycleConfiguration))]
-    [NotifyPropertyChangedFor(nameof(RoomConfiguration))]
+    [NotifyPropertyChangedFor(nameof(RoomBrightness))]
     [NotifyPropertyChangedFor(nameof(TargetConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedDayConfiguration))]
     [NotifyPropertyChangedFor(nameof(AdjustedNightConfiguration))]
@@ -300,10 +290,10 @@ public partial class DashboardViewModel : ViewModelBase
         : _settingsService.IsDefaultToDayConfigurationEnabled ? _settingsService.DayConfiguration
         : ColorConfiguration.Default;
 
-    // Whether the screen follows the room rather than the clock, which it does whenever the room
-    // is being read. The cycle preview shows the clock's own cycle, so the room stays out of it.
-    public bool IsFollowingRoom =>
-        IsEnabled && !IsPaused && !IsCyclePreviewEnabled && _settingsService.IsAmbientLightEnabled;
+    // Whether the screen's brightness follows the room rather than the clock, which it does
+    // whenever the room is being read. The temperature goes by the clock either way, so the cycle
+    // preview runs through the day's temperatures at the brightness the room asks for.
+    public bool IsFollowingRoom => IsEnabled && !IsPaused && _settingsService.IsAmbientLightEnabled;
 
     // The light in the room, from 0 in a room as dark as the dark reference to 1 in one as bright
     // as the bright reference, while the screen follows the room and a reading has come in
@@ -329,23 +319,20 @@ public partial class DashboardViewModel : ViewModelBase
             (AmbientLightLevel ?? 0).ToString("P0", CultureInfo.CurrentCulture)
         );
 
-    // What the room asks for: the night-time settings in a room as dark as the dark reference, the
-    // day-time settings in one as bright as the bright reference, and in between for anything
-    // between, with the offset on top. Until the first reading comes in, the room counts as bright.
-    public ColorConfiguration RoomConfiguration =>
-        AmbientLight
-            .GetConfiguration(
+    // The brightness the room asks for: the night-time brightness in a room as dark as the dark
+    // reference, the day-time brightness in one as bright as the bright reference, and as bright
+    // as the room in between, with the offset on top. Until the first reading comes in, the room
+    // counts as bright.
+    public double RoomBrightness =>
+        Math.Clamp(
+            AmbientLight.GetBrightness(
                 AmbientLightLevel ?? 1,
-                _settingsService.NightConfiguration,
-                _settingsService.DayConfiguration
-            )
-            .WithOffset(TemperatureOffset, BrightnessOffset)
-            .Clamp(
-                _settingsService.MinimumTemperature,
-                _settingsService.MaximumTemperature,
-                _settingsService.MinimumBrightness,
-                _settingsService.MaximumBrightness
-            );
+                _settingsService.NightConfiguration.Brightness,
+                _settingsService.DayConfiguration.Brightness
+            ) + BrightnessOffset,
+            _settingsService.MinimumBrightness,
+            _settingsService.MaximumBrightness
+        );
 
     public ColorConfiguration TargetConfiguration
     {
@@ -361,20 +348,18 @@ public partial class DashboardViewModel : ViewModelBase
             if (!IsFollowingRoom)
                 return CycleConfiguration;
 
-            // While the room is read for the screen's own glow, the screen holds the brightness asked
-            if (_ambientLightService.ForcedBrightness is { } forcedBrightness)
+            // The temperature goes by the time of day and the brightness by the room, except while
+            // the room is read for the screen's own glow, when the screen holds the brightness asked
+            return CycleConfiguration with
             {
-                return RoomConfiguration with
-                {
-                    Brightness = Math.Clamp(
+                Brightness = _ambientLightService.ForcedBrightness is { } forcedBrightness
+                    ? Math.Clamp(
                         forcedBrightness,
                         _settingsService.MinimumBrightness,
                         _settingsService.MaximumBrightness
-                    ),
-                };
-            }
-
-            return RoomConfiguration;
+                    )
+                    : RoomBrightness,
+            };
         }
     }
 
@@ -390,11 +375,17 @@ public partial class DashboardViewModel : ViewModelBase
             _ when CurrentConfiguration != TargetConfiguration => CycleState.Transition,
             _ when !IsEnabled => CycleState.Disabled,
             _ when IsPaused => CycleState.Paused,
-            // A room between dark and bright is a transition, like a sunset
-            _ when TargetConfiguration == AdjustedDayConfiguration => CycleState.Day,
-            _ when TargetConfiguration == AdjustedNightConfiguration => CycleState.Night,
+            _ when IsAtCycleConfiguration(AdjustedDayConfiguration) => CycleState.Day,
+            _ when IsAtCycleConfiguration(AdjustedNightConfiguration) => CycleState.Night,
             _ => CycleState.Transition,
         };
+
+    // Whether the screen is where the cycle puts it by day or by night. While the brightness
+    // follows the room, only the temperature goes by the time of day, so only it counts.
+    private bool IsAtCycleConfiguration(ColorConfiguration configuration) =>
+        IsFollowingRoom
+            ? TargetConfiguration.Temperature == configuration.Temperature
+            : TargetConfiguration == configuration;
 
     public string StatusText =>
         Program.Name
@@ -494,11 +485,7 @@ public partial class DashboardViewModel : ViewModelBase
 
     // The camera is read only while the brightness is following the room
     private void UpdateAmbientLightMetering() =>
-        _ambientLightService.IsMeteringRequested =
-            IsEnabled
-            && !IsPaused
-            && !IsCyclePreviewEnabled
-            && _settingsService.IsAmbientLightEnabled;
+        _ambientLightService.IsMeteringRequested = IsFollowingRoom;
 
     private void UpdateInstant()
     {

@@ -69,7 +69,7 @@ public partial class LocalizationManager
             // Ambient light settings tab
             [nameof(AmbientLightLabel)] = "Follow the room's light",
             [nameof(AmbientLightTooltip)] = """
-                Read the light in the room through the webcam, as a phone reads its light sensor, and set the color temperature and brightness from it instead of from the time of day: the day-time settings in a bright room, the night-time settings in a dark one, and in between for anything between. Sunrise and sunset are not used while this is on.
+                Read the light in the room through the webcam, as a phone reads its light sensor, and set the brightness from it instead of from the time of day: the day-time brightness in a bright room, the night-time brightness in a dark one, and as bright as the room in between. The color temperature still follows sunrise and sunset.
 
                 The camera's activity light is on whenever it is being read, and a camera another program has open is left alone.
                 """,

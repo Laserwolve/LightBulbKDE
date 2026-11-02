@@ -88,30 +88,24 @@ public class AmbientLightSpecs
     }
 
     [Theory]
-    [InlineData(0, 4500, 0.1)]
-    [InlineData(0.05, 4600, 0.1)]
-    [InlineData(0.3, 5100, 0.3)]
-    [InlineData(0.5, 5500, 0.5)]
-    [InlineData(0.9, 6300, 0.8)]
-    [InlineData(1, 6500, 0.8)]
-    [InlineData(1.5, 6500, 0.8)]
-    [InlineData(-0.5, 4500, 0.1)]
+    [InlineData(0, 0.1)]
+    [InlineData(0.05, 0.1)]
+    [InlineData(0.3, 0.3)]
+    [InlineData(0.5, 0.5)]
+    [InlineData(0.9, 0.8)]
+    [InlineData(1, 0.8)]
+    [InlineData(1.5, 0.8)]
+    [InlineData(-0.5, 0.1)]
     public void I_observe_the_room_as_the_brightness_held_between_the_two_settings(
         double level,
-        double expectedTemperature,
         double expectedBrightness
     )
     {
         // Act
-        var configuration = AmbientLight.GetConfiguration(
-            level,
-            new ColorConfiguration(4500, 0.1),
-            new ColorConfiguration(6500, 0.8)
-        );
+        var brightness = AmbientLight.GetBrightness(level, 0.1, 0.8);
 
         // Assert
-        configuration.Temperature.Should().BeApproximately(expectedTemperature, 1);
-        configuration.Brightness.Should().BeApproximately(expectedBrightness, 0.005);
+        brightness.Should().BeApproximately(expectedBrightness, 0.005);
     }
 
     [Fact]
