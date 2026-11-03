@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="../favicon.ico" Link="favicon.ico" />
+    <AvaloniaResource Include="TrayIcon.png" />
   </ItemGroup>
 
   <ItemGroup>

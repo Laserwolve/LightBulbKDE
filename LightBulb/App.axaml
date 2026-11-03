@@ -169,10 +169,11 @@
   <!--  Tray icon  -->
   <TrayIcon.Icons>
     <TrayIcons>
+      <!--  Plasma shows a tray icon as the app draws it, so the tray gets a white bulb to match Plasma's own icons: Material Design's lightbulb-outline in Breeze Dark's text color, #fcfcfc  -->
       <TrayIcon
         x:DataType="vm:MainViewModel"
         Clicked="TrayIcon_OnClicked"
-        Icon="/favicon.ico"
+        Icon="/TrayIcon.png"
         ToolTipText="{Binding Dashboard.StatusText}"
       >
         <TrayIcon.Menu>
